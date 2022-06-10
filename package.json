@@ -1,0 +1,28 @@
+{
+  "name": "phasis",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "depcheck": "npm run depcheck --workspaces --if-present",
+    "lint": "npm run --workspaces --if-present -- lint",
+    "test": "npm test --workspaces --if-present",
+    "prepare": "husky install && (cd .git/hooks; find ../../.husky -mindepth 1 -maxdepth 1 -print0 | xargs -0 -i ln -sfb {})",
+    "prettier": "prettier",
+    "prettier:check": "npm run --workspaces --if-present -- prettier --check",
+    "workspace:core": "npm run --silent --workspace @phasis/core --"
+  },
+  "author": "",
+  "license": "ISC",
+  "workspaces": [
+    "packages/core"
+  ],
+  "devDependencies": {
+    "concurrently": "^7.2.1",
+    "husky": "^8.0.0",
+    "prettier": "^2.6.2",
+    "pretty-quick": "^3.1.3"
+  }
+}

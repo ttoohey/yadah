@@ -1,0 +1,6 @@
+{
+  "delay": 100,
+  "watch": ["src"],
+  "exec": "npm run",
+  "ignore": ["*.test.js"]
+}
