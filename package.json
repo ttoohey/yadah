@@ -12,12 +12,14 @@
     "prepare": "husky install && (cd .git/hooks; find ../../.husky -mindepth 1 -maxdepth 1 -print0 | xargs -0 -i ln -sfb {})",
     "prettier": "prettier",
     "prettier:check": "npm run --workspaces --if-present -- prettier --check",
-    "workspace:core": "npm run --silent --workspace @phasis/core --"
+    "workspace:core": "npm run --silent --workspace @phasis/core --",
+    "workspace:service-model": "npm run --silent --workspace @phasis/service-model --"
   },
   "author": "",
   "license": "ISC",
   "workspaces": [
-    "packages/core"
+    "packages/core",
+    "packages/service-model"
   ],
   "devDependencies": {
     "concurrently": "^7.2.1",

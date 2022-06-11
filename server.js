@@ -6,4 +6,9 @@ concurrently([
     name: "core",
     prefixColor: "cyan",
   },
+  {
+    command: "npm start -s -w @phasis/service-model",
+    name: "service-model",
+    prefixColor: "green",
+  },
 ]);

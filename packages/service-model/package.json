@@ -1,0 +1,45 @@
+{
+  "name": "@phasis/service-model",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "exports": {
+    "./ServiceModel": "./lib/ServiceModel.js",
+    "./ServiceTransaction": "./lib/ServiceTransaction.js"
+  },
+  "files": [
+    "lib/*.js"
+  ],
+  "scripts": {
+    "build": "mkdir -p lib && babel --ignore \"**/*.test.js\" -d lib src --source-maps=false --copy-files --no-copy-ignored",
+    "clean": "rimraf lib",
+    "depcheck": "depcheck",
+    "lint": "eslint src",
+    "prettier": "prettier src",
+    "start": "nodemon build",
+    "test": "ava"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=18.3.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.17.10",
+    "@babel/core": "^7.18.2",
+    "@babel/eslint-parser": "^7.18.2",
+    "@babel/plugin-proposal-export-default-from": "^7.17.12",
+    "@babel/preset-env": "^7.18.2",
+    "ava": "^4.3.0",
+    "babel-register-esm": "^1.2.1",
+    "depcheck": "^1.4.3",
+    "eslint": "^8.17.0",
+    "eslint-config-prettier": "^8.5.0",
+    "nodemon": "^2.0.16",
+    "prettier": "^2.6.2",
+    "rimraf": "^3.0.2"
+  },
+  "dependencies": {
+    "csv-stringify": "^6.1.0"
+  }
+}
