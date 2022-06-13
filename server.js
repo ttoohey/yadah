@@ -11,4 +11,9 @@ concurrently([
     name: "service-model",
     prefixColor: "green",
   },
+  {
+    command: "npm start -s -w @phasis/service-schedule",
+    name: "service-schedule",
+    prefixColor: "blue",
+  },
 ]);

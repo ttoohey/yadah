@@ -1,5 +1,5 @@
 import { once } from "node:events";
-import stringify from "csv-stringify";
+import { stringify } from "csv-stringify";
 
 async function* makeIterable(data) {
   if (data instanceof Function) {
