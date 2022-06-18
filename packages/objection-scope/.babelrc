@@ -8,12 +8,6 @@
           "node": "18"
         }
       }
-    ],
-    [
-      "@babel/preset-typescript",
-      {
-        "allExtensions": true
-      }
     ]
   ],
   "plugins": ["@babel/plugin-proposal-export-default-from"],

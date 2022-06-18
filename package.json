@@ -5,26 +5,29 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
-    "depcheck": "npm run depcheck --workspaces --if-present",
-    "lint": "npm run --workspaces --if-present -- lint",
-    "test": "npm test --workspaces --if-present",
-    "test:core": "npm test --silent --workspace @phasis/core --",
-    "test:service-model": "npm test --silent --workspace @phasis/service-model --",
-    "test:service-schedule": "npm test --silent --workspace @phasis/service-schedule --",
+    "build": "npm run --quiet --workspaces --if-present -- build",
+    "depcheck": "npm run --quiet --workspaces --if-present -- depcheck",
+    "lint": "npm run --quiet --workspaces --if-present -- lint",
+    "test": "npm test --quiet --workspaces --if-present --",
+    "test:core": "npm test --workspace @phasis/core --",
+    "test:objection-scope": "npm test --workspace @phasis/objection-scope --",
+    "test:service-model": "npm test --workspace @phasis/service-model --",
+    "test:service-schedule": "npm test --workspace @phasis/service-schedule --",
     "prepare": "husky install && (cd .git/hooks; find ../../.husky -mindepth 1 -maxdepth 1 -print0 | xargs -0 -i ln -sfb {}) && npm run --workspaces --if-present prepare",
     "prettier": "prettier",
-    "prettier:check": "npm run --workspaces --if-present -- prettier --check",
-    "workspace:core": "npm run --silent --workspace @phasis/core --",
-    "workspace:service-model": "npm run --silent --workspace @phasis/service-model --",
-    "workspace:service-schedule": "npm run --silent --workspace @phasis/service-schedule --"
+    "prettier:check": "npm run --quiet --workspaces --if-present -- prettier --check",
+    "workspace:core": "npm run --workspace @phasis/core --",
+    "workspace:objection-scope": "npm run --workspace @phasis/objection-scope --",
+    "workspace:service-model": "npm run --workspace @phasis/service-model --",
+    "workspace:service-schedule": "npm run --workspace @phasis/service-schedule --"
   },
   "author": "",
   "license": "ISC",
   "workspaces": [
     "packages/core",
     "packages/service-model",
-    "packages/service-schedule"
+    "packages/service-schedule",
+    "packages/objection-scope"
   ],
   "devDependencies": {
     "concurrently": "^7.2.1",

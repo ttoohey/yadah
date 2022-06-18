@@ -16,4 +16,9 @@ concurrently([
     name: "service-schedule",
     prefixColor: "blue",
   },
+  {
+    command: "npm start -s -w @phasis/objection-scope",
+    name: "objection-scope",
+    prefixColor: "blueBright",
+  },
 ]);

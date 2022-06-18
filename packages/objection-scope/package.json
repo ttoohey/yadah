@@ -1,13 +1,10 @@
 {
-  "name": "@phasis/core",
+  "name": "@phasis/objection-scope",
   "version": "1.0.0",
   "description": "",
   "type": "module",
   "exports": {
-    ".": "./lib/index.js",
-    "./mixin": "./lib/mixin.js",
-    "./Service": "./lib/Service.js",
-    "./ServiceManager": "./lib/ServiceManager.js"
+    ".": "./lib/index.js"
   },
   "files": [
     "lib/*.js"
@@ -28,18 +25,21 @@
   },
   "devDependencies": {
     "@babel/cli": "^7.17.10",
-    "@babel/core": "^7.18.2",
+    "@babel/core": "^7.18.5",
     "@babel/eslint-parser": "^7.18.2",
     "@babel/plugin-proposal-export-default-from": "^7.17.12",
     "@babel/preset-env": "^7.18.2",
-    "@babel/preset-typescript": "^7.17.12",
     "ava": "^4.3.0",
     "babel-register-esm": "^1.2.1",
     "depcheck": "^1.4.3",
     "eslint": "^8.17.0",
     "eslint-config-prettier": "^8.5.0",
     "nodemon": "^2.0.16",
-    "prettier": "^2.6.2",
+    "prettier": "^2.7.1",
     "rimraf": "^3.0.2"
+  },
+  "dependencies": {
+    "objection": "^3.0.1",
+    "pluralize": "^8.0.0"
   }
 }
