@@ -1,10 +1,10 @@
 {
-  "name": "@phasis/service-listener",
+  "name": "@phasis/objection-iterator",
   "version": "1.0.0",
   "description": "",
   "type": "module",
   "exports": {
-    "./ServiceListener": "./lib/ServiceListener.js"
+    ".": "./lib/index.js"
   },
   "files": [
     "lib/*.js"
@@ -14,7 +14,6 @@
     "clean": "rimraf lib",
     "depcheck": "depcheck",
     "lint": "eslint src",
-    "prepare": "npm run clean && npm run build",
     "prettier": "prettier src",
     "start": "nodemon build",
     "test": "ava"
@@ -40,6 +39,6 @@
     "rimraf": "^3.0.2"
   },
   "dependencies": {
-    "camelcase": "^7.0.0"
+    "pg-query-stream": "^4.2.3"
   }
 }

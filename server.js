@@ -2,27 +2,32 @@ import concurrently from "concurrently";
 
 concurrently([
   {
-    command: "npm start -s -w @phasis/core",
+    command: "npm start -w @phasis/core",
     name: "core",
     prefixColor: "cyan",
   },
   {
-    command: "npm start -s -w @phasis/objection-scope",
+    command: "npm start -w @phasis/objection-iterator",
+    name: "objection-iterator",
+    prefixColor: "yellow",
+  },
+  {
+    command: "npm start -w @phasis/objection-scope",
     name: "objection-scope",
     prefixColor: "blueBright",
   },
   {
-    command: "npm start -s -w @phasis/service-listener",
+    command: "npm start -w @phasis/service-listener",
     name: "service-listener",
     prefixColor: "redBright",
   },
   {
-    command: "npm start -s -w @phasis/service-model",
+    command: "npm start -w @phasis/service-model",
     name: "service-model",
     prefixColor: "green",
   },
   {
-    command: "npm start -s -w @phasis/service-schedule",
+    command: "npm start -w @phasis/service-schedule",
     name: "service-schedule",
     prefixColor: "blue",
   },

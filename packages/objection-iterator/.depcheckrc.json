@@ -1,0 +1,3 @@
+{
+  "ignores": ["babel-register-esm", "pg-query-stream"]
+}
