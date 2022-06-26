@@ -6,8 +6,8 @@ Basic usage
 
 ```js
 import MyModel from "./models/MyModel";
-import Service, { mixin } from "@phasis/core";
-import { ServiceModel, ServiceTransaction } from "@phasis/service-model";
+import Service, { mixin } from "@yadah/service-manager";
+import { ServiceModel, ServiceTransaction } from "@yadah/service-model";
 
 class MyService extends mixin(
   Service,

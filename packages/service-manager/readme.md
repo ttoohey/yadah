@@ -1,4 +1,4 @@
-# phasis/core
+# yadah/service-manager
 
 Provides the core service manager logic for configuring an application's
 data layer subsystems, and creating "service classes" to provide a standard way
@@ -10,7 +10,7 @@ Create service classes
 
 ```js
 // my-package/services.js
-import { Service } from "@phasis/core";
+import { Service } from "@yadah/service-manager";
 
 export class ServiceA extends Service {
   doATask() {
@@ -29,7 +29,7 @@ Create a service manager
 
 ```js
 // my-package/index.js
-import { ServiceManager } from "@phasis/core";
+import { ServiceManager } from "@yadah/service-manager";
 import * as modules from "./services.js";
 
 export const logger = createLogger(); // example
@@ -65,8 +65,8 @@ Mixins are used to create common logic for services.
 
 ```js
 // my-package/BaseService.js
-import { mixin, Service } from "@phasis/core";
-import Listener from "@phasis/service-listener";
+import { mixin, Service } from "@yadah/service-manager";
+import Listener from "@yadah/service-listener";
 
 export class BaseService extends mixin(Service, Listener) {}
 ```
@@ -104,7 +104,7 @@ A mixin can depend on another mixin by wrapping it with `mixin()`
 
 ```js
 // my-package/SomeMixin.js
-import { mixin } from "@phasis/core";
+import { mixin } from "@yadah/service-manager";
 import DependantMixin from "other-package";
 
 export default (SuperClass) =>

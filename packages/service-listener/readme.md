@@ -11,7 +11,7 @@ This is called during the boot process Service classes will have access to other
 services and subsystems (such as PubSub and MessageQueue)
 
 ```js
-import { ServiceListener } from "@phasis/service-listener";
+import { ServiceListener } from "@yadah/service-listener";
 
 class MyService extends mixin(Service, ServiceListener) {
   registerListeners() {
@@ -46,7 +46,7 @@ App.services.OtherService.emit("hola", "mundo"); // logs "Hello mundo (OtherServ
 Helper function for setting up event listeners that broadcast data via the PubSub provider
 
 ```js
-import { ServiceListener } from "@phasis/service-listener";
+import { ServiceListener } from "@yadah/service-listener";
 
 class MyService extends mixin(Service, ServiceListener) {
   registerListeners() {
@@ -83,7 +83,7 @@ App.pubsub.on("myServiceGoodbye", listener);
 Helper function for setting up event listeners that send data via the message queue to a receiver.
 
 ```js
-import { ServiceListener } from "@phasis/service-listener";
+import { ServiceListener } from "@yadah/service-listener";
 
 class MyService extends mixin(Service, ServiceListener) {
   registerListeners() {
@@ -102,7 +102,7 @@ App.services.MyService.emit("hello", "world"); // queues a `MyService.hello` job
 The helper will construct a name for the queued job if a named function is specified as the receiver.
 
 ```js
-import { ServiceListener } from "@phasis/service-listener";
+import { ServiceListener } from "@yadah/service-listener";
 
 class MyService extends mixin(Service, ServiceListener) {
   registerListeners() {
@@ -117,7 +117,7 @@ class MyService extends mixin(Service, ServiceListener) {
 Multiple events can be listened to
 
 ```js
-import { ServiceListener } from "@phasis/service-listener";
+import { ServiceListener } from "@yadah/service-listener";
 
 class MyService extends mixin(Service, ServiceListener) {
   registerListeners() {
