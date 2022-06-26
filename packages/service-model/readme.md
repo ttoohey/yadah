@@ -320,5 +320,5 @@ this.transaction(async (options) => {
 });
 ```
 
-This is normally used in conjunction with the [service-listener](https://bitbucket.org/westonenergy/service-listener/) mixin where the `.queue()` function is used to send emitted events to
-the message queue.
+This is normally used in conjunction with the [service-listener](../service-listener/) mixin
+where the `.queue()` function is used to send emitted events to the message queue.
