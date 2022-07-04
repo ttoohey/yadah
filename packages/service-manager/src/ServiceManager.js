@@ -9,7 +9,7 @@ export default class ServiceManager {
   #modules;
   #subsystems;
 
-  constructor(subsystems, name = "services") {
+  constructor(subsystems, serviceModules) {
     const services = {
       [Symbol.iterator]: function* () {
         for (const value of Object.values(services)) {
@@ -18,7 +18,10 @@ export default class ServiceManager {
       },
     };
     this.#services = services;
-    this.#subsystems = { ...subsystems, [name]: services };
+    this.#subsystems = { ...subsystems, services };
+    if (serviceModules) {
+      this.boot(serviceModules);
+    }
   }
   boot(modules) {
     const services = this.#services;
@@ -62,5 +65,8 @@ export default class ServiceManager {
         .filter(isServiceInstance)
         .map((service) => service.shutdown())
     );
+  }
+  get services() {
+    return this.#services;
   }
 }

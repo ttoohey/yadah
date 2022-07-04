@@ -1,9 +1,9 @@
+import dedupe from "@yadah/dedupe-mixin";
 import ScopeBuilderBase from "./ScopeBuilder.js";
 
-export default function (Model) {
-  return class extends Model {
+function ScopeMixin(Model) {
+  return class Scope extends Model {
     #relationScopes;
-
     constructor() {
       super();
       this.#relationScopes = {};
@@ -79,3 +79,5 @@ export default function (Model) {
     }
   };
 }
+
+export default ScopeMixin |> dedupe(%);

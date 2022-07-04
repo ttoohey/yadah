@@ -16,7 +16,13 @@
       }
     ]
   ],
-  "plugins": ["@babel/plugin-proposal-export-default-from"],
+  "plugins": [
+    "@babel/plugin-proposal-export-default-from",
+    [
+      "@babel/plugin-proposal-pipeline-operator",
+      { "proposal": "hack", "topicToken": "%" }
+    ]
+  ],
   "sourceMaps": "inline",
   "comments": false
 }

@@ -1,7 +1,6 @@
-import { mixin } from "objection";
-import ScopeMixin from "./ScopeMixin.js";
-import PagingScope from "./PagingScope.js";
-import OrderScope from "./OrderScope.js";
-
-export default (Model) =>
-  class extends mixin(Model, [ScopeMixin, PagingScope, OrderScope]) {};
+import OrderScopeMixin_ from "./OrderScopeMixin.js";
+import PagingScopeMixin_ from "./PagingScopeMixin.js";
+export ScopeMixin from "./ScopeMixin.js";
+export const OrderScopeMixin = OrderScopeMixin_;
+export const PagingScopeMixin = PagingScopeMixin_;
+export default (Model) => Model |> OrderScopeMixin(%) |> PagingScopeMixin(%);

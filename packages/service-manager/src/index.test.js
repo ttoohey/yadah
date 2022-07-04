@@ -1,6 +1,9 @@
 import test from "ava";
-import { mixin } from "./index.js";
+import ServiceManager from "./index.js";
 
-test("exports mixin function", (t) => {
-  t.truthy(mixin instanceof Function, "'mixin' should be function");
+test("exports ServiceManager class", (t) => {
+  t.truthy(
+    ServiceManager.constructor instanceof Function,
+    "'ServiceManager' should be a class"
+  );
 });

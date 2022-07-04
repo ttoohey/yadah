@@ -8,4 +8,6 @@ export default class Service extends EventEmitter {
   boot() {}
   async shutdown() {}
   async startup() {}
+
+  static services = {};
 }

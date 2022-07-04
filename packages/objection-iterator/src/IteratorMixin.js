@@ -1,5 +1,7 @@
-export default function IteratorMixin(Model) {
-  return class extends Model {
+import dedupe from "@yadah/dedupe-mixin";
+
+function IteratorMixin(superclass) {
+  return class Iterator extends superclass {
     static get QueryBuilder() {
       return class extends super.QueryBuilder {
         async *[Symbol.asyncIterator]() {
@@ -14,3 +16,5 @@ export default function IteratorMixin(Model) {
     }
   };
 }
+
+export default IteratorMixin |> dedupe(%);

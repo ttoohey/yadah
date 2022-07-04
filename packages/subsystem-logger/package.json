@@ -1,0 +1,44 @@
+{
+  "name": "@yadah/subsystem-logger",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "exports": "./lib/index.js",
+  "files": [
+    "lib/*.js"
+  ],
+  "scripts": {
+    "build": "mkdir -p lib && babel --ignore \"**/*.test.js\" -d lib src --source-maps=false --copy-files --no-copy-ignored",
+    "clean": "rimraf lib",
+    "depcheck": "depcheck",
+    "lint": "eslint src",
+    "prepare": "npm run clean && npm run build",
+    "prettier": "prettier src",
+    "start": "nodemon build",
+    "test": "ava"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=18.3.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.18.6",
+    "@babel/eslint-parser": "^7.18.2",
+    "@babel/plugin-proposal-export-default-from": "^7.18.6",
+    "@babel/plugin-proposal-pipeline-operator": "^7.18.6",
+    "@babel/preset-env": "^7.18.6",
+    "ava": "^4.3.0",
+    "babel-register-esm": "^1.2.1",
+    "depcheck": "^1.4.3",
+    "eslint": "^8.18.0",
+    "eslint-config-prettier": "^8.5.0",
+    "nodemon": "^2.0.18",
+    "prettier": "^2.7.1",
+    "rimraf": "^3.0.2"
+  },
+  "dependencies": {
+    "triple-beam": "^1.3.0",
+    "winston": "^3.8.1"
+  }
+}

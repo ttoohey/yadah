@@ -1,34 +1,95 @@
 import concurrently from "concurrently";
 
-concurrently([
+concurrently(
+  [
+    {
+      command: "npm start -w @yadah/dedupe-mixin",
+      name: "dedupe-mixin",
+    },
+    {
+      command: "npm start -w @yadah/service-manager",
+      name: "service-manager",
+    },
+    {
+      command: "npm start -w @yadah/objection-iterator",
+      name: "objection-iterator",
+    },
+    {
+      command: "npm start -w @yadah/objection-scope",
+      name: "objection-scope",
+    },
+    {
+      command: "npm start -w @yadah/service-critical-section",
+      name: "service-critical-section",
+    },
+    {
+      command: "npm start -w @yadah/service-listener",
+      name: "service-listener",
+    },
+    {
+      command: "npm start -w @yadah/service-model",
+      name: "service-model",
+    },
+    {
+      command: "npm start -w @yadah/service-schedule",
+      name: "service-schedule",
+    },
+    {
+      command: "npm start -w @yadah/subsystem-context",
+      name: "subsystem-context",
+    },
+    {
+      command: "npm start -w @yadah/subsystem-knex",
+      name: "subsystem-knex",
+    },
+    {
+      command: "npm start -w @yadah/subsystem-logger",
+      name: "subsystem-logger",
+    },
+    {
+      command: "npm start -w @yadah/subsystem-message-queue",
+      name: "subsystem-message-queue",
+    },
+    {
+      command: "npm start -w @yadah/subsystem-pubsub",
+      name: "subsystem-pubsub",
+    },
+    {
+      command: "npm start -w @yadah/yadah",
+      name: "yadah",
+      prefixColor: "greenBright",
+    },
+  ],
   {
-    command: "npm start -w @yadah/service-manager",
-    name: "core",
-    prefixColor: "cyan",
-  },
-  {
-    command: "npm start -w @yadah/objection-iterator",
-    name: "objection-iterator",
-    prefixColor: "yellow",
-  },
-  {
-    command: "npm start -w @yadah/objection-scope",
-    name: "objection-scope",
-    prefixColor: "blueBright",
-  },
-  {
-    command: "npm start -w @yadah/service-listener",
-    name: "service-listener",
-    prefixColor: "redBright",
-  },
-  {
-    command: "npm start -w @yadah/service-model",
-    name: "service-model",
-    prefixColor: "green",
-  },
-  {
-    command: "npm start -w @yadah/service-schedule",
-    name: "service-schedule",
-    prefixColor: "blue",
-  },
-]);
+    prefixColors: [
+      "red",
+      "green",
+      "yellow",
+      "blue",
+      "magenta",
+      "cyan",
+      "white",
+      "blackBright",
+      "redBright",
+      "yellowBright",
+      "blueBright",
+      "magentaBright",
+      "cyanBright",
+      "whiteBright",
+      "bgRed",
+      "bgGreen",
+      "bgYellow",
+      "bgBlue",
+      "bgMagenta",
+      "bgCyan",
+      "bgWhite",
+      "bgBlackBright",
+      "bgRedBright",
+      "bgYellowBright",
+      "bgBlueBright",
+      "bgMagentaBright",
+      "bgCyanBright",
+      "bgWhiteBright",
+    ],
+  }
+);
