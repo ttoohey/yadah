@@ -8,13 +8,16 @@
     "lib/*.js"
   ],
   "scripts": {
-    "build": "mkdir -p lib && babel --ignore \"**/*.test.js\" -d lib src --source-maps=false --copy-files --no-copy-ignored",
+    "build": "mkdir -p lib && npm run -- transpile --source-maps=false",
+    "build:dev": "mkdir -p lib && npm run -- transpile --source-maps=both",
     "clean": "rimraf lib",
     "depcheck": "depcheck",
     "lint": "eslint src",
+    "prepare": "npm run clean && npm run build",
     "prettier": "prettier src",
-    "start": "nodemon build",
-    "test": "ava"
+    "start": "nodemon build:dev",
+    "test": "ava",
+    "transpile": "babel --ignore \"**/*.test.js\" -d lib src --copy-files --no-copy-ignored"
   },
   "author": "",
   "license": "UNLICENSED",
