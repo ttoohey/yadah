@@ -5,16 +5,12 @@ class MessageQueue {
   taskList = {};
 
   constructor(options) {
+    this.knex = options.knex;
     this.context = options.context;
     this.logger = new Logger((scope) => {
       return (level, message, meta) =>
         options.logger.log({ level, message, ...meta, scope });
     });
-  }
-
-  async transaction(callback) {
-    const result = await callback(this);
-    return result;
   }
 
   async send(taskId, payload) {
@@ -36,7 +32,7 @@ class MessageQueue {
       ])
     );
     const noHandleSignals = true;
-    const pollInterval = 60000;
+    const pollInterval = 3000;
     this.runner = await run({
       taskList,
       logger,
@@ -51,8 +47,6 @@ class MessageQueue {
   }
 }
 
-export default function createMessageQueue(options) {
-  const mq = new MessageQueue(options);
-  mq.knex = options.knex;
-  return mq;
+export default function createMessageQueue(context, knex, logger) {
+  return new MessageQueue({ context, knex, logger });
 }

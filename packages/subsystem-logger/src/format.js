@@ -7,11 +7,11 @@ export function pretty(...args) {
   return winston.format.combine(
     winston.format.colorize(),
     winston.format((info) => {
-      const timestamp = chalk.grey(new Date().toISOString());
+      const timestamp = chalk.dim(new Date().toISOString());
       info[MESSAGE] = `${info.level}: ${info.message}`;
       const splats = info[SPLAT] || [];
       const splatMessages = splats
-        .filter((s) => typeof s === "object" && s.message)
+        .filter((s) => s !== null && typeof s === "object" && s.message)
         .map((s) => s.message);
       const len = splatMessages.reduce((len, msg) => len + msg.length + 1, 0);
       info[MESSAGE] = info[MESSAGE].slice(0, info[MESSAGE].length - len);

@@ -9,5 +9,5 @@ export createLogger, { LoggerMixin } from "@yadah/subsystem-logger";
 export createMessageQueue, {
   MessageQueueMixin,
 } from "@yadah/subsystem-message-queue";
-export { PubSubMixin } from "@yadah/subsystem-pubsub";
+export createPubSub, { PubSubMixin } from "@yadah/subsystem-pubsub";
 export Model from "./Model.js";

@@ -2,6 +2,7 @@ import dedupe from "@yadah/dedupe-mixin";
 import IteratorMixin from "@yadah/objection-iterator";
 import { ScopeMixin } from "@yadah/objection-scope";
 import { ContextMixin } from "@yadah/subsystem-context";
+import { KnexMixin } from "@yadah/subsystem-knex";
 import { stringify } from "csv-stringify";
 import { isEqual } from "lodash-es";
 import assert from "node:assert";
@@ -29,8 +30,13 @@ function ModelMixin(superclass, Model) {
     );
   }
 
-  const mixins = superclass |> ContextMixin(%) |> TransactionMixin(%);
+  const mixins =
+    superclass |> KnexMixin(%) |> ContextMixin(%) |> TransactionMixin(%);
   return class ServiceModel extends mixins {
+    constructor() {
+      super(...arguments);
+      Model.knex(this.knex);
+    }
     async find(id, options = {}) {
       const { allowNotFound = false } = options;
       if (id instanceof Model) {
@@ -49,14 +55,14 @@ function ModelMixin(superclass, Model) {
       return await query;
     }
 
-    list(scope = {}) {
+    list(criteria = {}) {
       const trx = this.context.get("transaction");
-      return Model.query(trx).scope(scope);
+      return Model.query(trx).scope(criteria);
     }
 
-    one(scope = {}) {
+    one(criteria = {}) {
       const trx = this.context.get("transaction");
-      return Model.query(trx).scope(scope).first();
+      return Model.query(trx).scope(criteria).first();
     }
 
     many(list, callback) {
@@ -73,35 +79,33 @@ function ModelMixin(superclass, Model) {
       return query;
     }
 
-    async count(scope = {}) {
+    async count(criteria = {}) {
       const trx = this.context.get("transaction");
-      return await Model.query(trx)
-        .scope(scope)
-        .count()
-        .then(([{ count }]) => parseInt(count, 10));
+      const [{ count }] = await Model.query(trx).scope(criteria).count();
+      return count;
     }
 
-    async sum(scope = {}, field) {
+    async sum(field, criteria = {}) {
       const trx = this.context.get("transaction");
-      const [{ sum }] = await Model.query(trx).scope(scope).sum(field);
-      return sum === null ? null : Number(sum);
+      const [{ sum }] = await Model.query(trx).scope(criteria).sum(field);
+      return sum;
     }
 
-    async avg(scope = {}, field) {
+    async avg(field, criteria = {}) {
       const trx = this.context.get("transaction");
-      const [{ avg }] = await Model.query(trx).scope(scope).avg(field);
-      return avg === null ? null : Number(avg);
+      const [{ avg }] = await Model.query(trx).scope(criteria).avg(field);
+      return avg;
     }
 
-    async min(fieldName, scope = {}) {
+    async min(field, criteria = {}) {
       const trx = this.context.get("transaction");
-      const [{ min }] = await Model.query(trx).scope(scope).min(fieldName);
+      const [{ min }] = await Model.query(trx).scope(criteria).min(field);
       return min;
     }
 
-    async max(fieldName, scope = {}) {
+    async max(field, criteria = {}) {
       const trx = this.context.get("transaction");
-      const [{ max }] = await Model.query(trx).scope(scope).max(fieldName);
+      const [{ max }] = await Model.query(trx).scope(criteria).max(field);
       return max;
     }
 

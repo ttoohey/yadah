@@ -38,7 +38,7 @@ function MessageQueueMixin(superclass) {
           }
           this.criticalSection(this.mq.send(taskId, payload));
         };
-        state.onList.map(([service, eventName]) =>
+        state.onList.forEach(([service, eventName]) =>
           service.on(eventName, eventHandler)
         );
         return eventHandler;

@@ -1,13 +1,8 @@
 import dedupe from "@yadah/dedupe-mixin";
 import ScopeBuilderBase from "./ScopeBuilder.js";
 
-function ScopeMixin(Model) {
-  return class Scope extends Model {
-    #relationScopes;
-    constructor() {
-      super();
-      this.#relationScopes = {};
-    }
+function ScopeMixin(superclass) {
+  return class Scope extends superclass {
     static get modifiers() {
       const scopes = this.scopes;
       return {
@@ -33,18 +28,18 @@ function ScopeMixin(Model) {
     static scopes = {
       AND: (query, { AND }) =>
         query.where((q) =>
-          AND.forEach((params) => q.where((q) => q.scope(params)))
+          AND.forEach((criteria) => q.where((q) => q.scope(criteria)))
         ),
       OR: (query, { OR }) =>
         query.where((q) =>
-          OR.forEach((params) => q.orWhere((q) => q.scope(params)))
+          OR.forEach((criteria) => q.orWhere((q) => q.scope(criteria)))
         ),
       NOT: (query, { NOT }) => query.whereNot((q) => q.scope(NOT)),
     };
     static get QueryBuilder() {
       return class extends super.QueryBuilder {
-        scope(params = {}) {
-          return this.modify("scope", params);
+        scope(criteria = {}) {
+          return this.modify("scope", criteria);
         }
       };
     }
@@ -55,27 +50,6 @@ function ScopeMixin(Model) {
           super(Model);
         }
       };
-    }
-
-    $relatedQuery(relationName, transactionOrKnex) {
-      const builder = super.$relatedQuery(relationName, transactionOrKnex);
-      if (this.#relationScopes[relationName]) {
-        return builder.scope(this.#relationScopes[relationName]);
-      }
-      return builder;
-    }
-    $setRelationScope(relationName, scope) {
-      if (
-        !Object.hasOwnProperty.call(
-          this.constructor.relationMappings,
-          relationName
-        )
-      ) {
-        throw new Error(
-          `A model class ${this.constructor.name} doesn't have relation ${relationName}`
-        );
-      }
-      this.#relationScopes[relationName] = scope;
     }
   };
 }

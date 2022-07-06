@@ -13,4 +13,7 @@ module.exports = {
   rules: {
     "no-buffer-constructor": "error",
   },
+  globals: {
+    BigInt: true,
+  },
 };
