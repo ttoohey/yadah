@@ -11,7 +11,7 @@
     "build": "mkdir -p lib && npm run -- transpile --source-maps=false",
     "build:dev": "mkdir -p lib && npm run -- transpile --source-maps=both",
     "clean": "rimraf lib",
-    "depcheck": "depcheck",
+    "depcheck": "node --no-warnings --input-type=module --eval 'import \"@yadah/depcheck\"'",
     "lint": "eslint src",
     "prepare": "npm run clean && npm run build",
     "prettier": "prettier src",
@@ -30,10 +30,10 @@
     "@babel/eslint-parser": "^7.18.2",
     "@babel/plugin-proposal-export-default-from": "^7.17.12",
     "@babel/plugin-proposal-pipeline-operator": "^7.18.6",
+    "@babel/plugin-syntax-import-assertions": "^7.18.6",
     "@babel/preset-env": "^7.18.2",
     "ava": "^4.3.0",
     "babel-register-esm": "^1.2.1",
-    "depcheck": "^1.4.3",
     "eslint": "^8.17.0",
     "eslint-config-prettier": "^8.5.0",
     "nodemon": "^2.0.16",
@@ -41,6 +41,11 @@
     "rimraf": "^3.0.2"
   },
   "dependencies": {
+    "@yadah/dedupe-mixin": "*",
+    "@yadah/objection-iterator": "*",
+    "@yadah/objection-scope": "*",
+    "@yadah/subsystem-context": "*",
+    "@yadah/subsystem-knex": "*",
     "csv-stringify": "^6.1.0",
     "lodash-es": "^4.17.21"
   }

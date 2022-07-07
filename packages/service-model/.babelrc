@@ -12,6 +12,7 @@
   ],
   "plugins": [
     "@babel/plugin-proposal-export-default-from",
+    "@babel/plugin-syntax-import-assertions",
     [
       "@babel/plugin-proposal-pipeline-operator",
       { "proposal": "hack", "topicToken": "%" }

@@ -8,7 +8,7 @@
   "type": "module",
   "scripts": {
     "build": "npm run --quiet --workspaces --if-present -- build",
-    "depcheck": "npx depcheck; npm run --quiet --workspaces --if-present -- depcheck",
+    "depcheck": "npx depcheck; npm run --workspaces --if-present -- depcheck",
     "lint": "npm run --quiet --workspaces --if-present -- lint",
     "prepare": "husky install && (cd .git/hooks; find ../../.husky -mindepth 1 -maxdepth 1 -print0 | xargs -0 -i ln -sfb {}) && npm run --workspaces --if-present prepare",
     "prettier:check": "npm run --quiet --workspaces --if-present -- prettier --check",
@@ -42,6 +42,7 @@
   },
   "workspaces": [
     "packages/dedupe-mixin",
+    "packages/depcheck",
     "packages/objection-iterator",
     "packages/objection-scope",
     "packages/service-critical-section",
@@ -49,12 +50,12 @@
     "packages/service-manager",
     "packages/service-model",
     "packages/service-schedule",
-    "packages/subsystem-logger",
-    "packages/yadah",
+    "packages/subsystem-context",
     "packages/subsystem-knex",
+    "packages/subsystem-logger",
     "packages/subsystem-message-queue",
     "packages/subsystem-pubsub",
-    "packages/subsystem-context"
+    "packages/yadah"
   ],
   "devDependencies": {
     "concurrently": "^7.2.1",

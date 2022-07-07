@@ -1,0 +1,17 @@
+{
+  "name": "@yadah/depcheck",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "exports": "./depcheck.js",
+  "files": [
+    "depcheck.js"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^5.0.1",
+    "depcheck": "^1.4.3",
+    "depcheck-parser-babel": "^2.0.12"
+  }
+}

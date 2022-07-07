@@ -1,6 +1,6 @@
 import test from "ava";
-import ServiceCriticalSection from "./ServiceCriticalSection.js";
+import CriticalSectionMixin from "./CriticalSectionMixin.js";
 
 test("it exports a mixin function", (t) => {
-  t.assert(ServiceCriticalSection instanceof Function);
+  t.assert(CriticalSectionMixin instanceof Function);
 });
