@@ -6,15 +6,14 @@ class MessageQueue {
 
   constructor(options) {
     this.knex = options.knex;
-    this.context = options.context;
     this.logger = new Logger((scope) => {
       return (level, message, meta) =>
         options.logger.log({ level, message, ...meta, scope });
     });
   }
 
-  async send(taskId, payload) {
-    const trx = this.context?.get("transaction") || this.knex;
+  async send(taskId, payload, knexTransaction) {
+    const trx = knexTransaction || this.knex;
     await trx.raw(
       "SELECT graphile_worker.add_job(?, payload := ?, queue_name := ?)",
       [taskId, JSON.stringify(payload), "primary"]
@@ -47,6 +46,6 @@ class MessageQueue {
   }
 }
 
-export default function createMessageQueue(context, knex, logger) {
-  return new MessageQueue({ context, knex, logger });
+export default function createMessageQueue(knex, logger) {
+  return new MessageQueue({ knex, logger });
 }

@@ -1,11 +1,11 @@
 import dedupe from "@yadah/dedupe-mixin";
-import assert from "node:assert";
 import ListenerMixin from "@yadah/service-listener";
-import CriticalSectionMixin from "@yadah/service-critical-section";
 import { Service } from "@yadah/service-manager";
+import { ContextMixin } from "@yadah/subsystem-context";
+import assert from "node:assert";
 
 function MessageQueueMixin(superclass) {
-  const mixins = superclass |> CriticalSectionMixin(%) |> ListenerMixin(%);
+  const mixins = superclass |> ContextMixin(%) |> ListenerMixin(%);
   return class MessageQueue extends mixins {
     /**
      * MessageQueue subsystem instance
@@ -36,7 +36,9 @@ function MessageQueueMixin(superclass) {
           if (!Array.isArray(payload)) {
             return;
           }
-          this.criticalSection(this.mq.send(taskId, payload));
+          return this.context(() =>
+            this.mq.send(taskId, payload, this.transactionOrKnex)
+          );
         };
         state.onList.forEach(([service, eventName]) =>
           service.on(eventName, eventHandler)

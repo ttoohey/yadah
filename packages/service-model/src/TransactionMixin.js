@@ -1,28 +1,26 @@
 import dedupe from "@yadah/dedupe-mixin";
-import { KnexMixin } from "@yadah/subsystem-knex";
 import { ContextMixin } from "@yadah/subsystem-context";
-import CriticalSectionMixin from "@yadah/service-critical-section";
+import { KnexMixin } from "@yadah/subsystem-knex";
+
+export const TRANSACTION = Symbol("TRANSACTION");
 
 function ServiceTransactionMixin(superclass) {
-  const mixins =
-    superclass |> KnexMixin(%) |> ContextMixin(%) |> CriticalSectionMixin(%);
+  const mixins = superclass |> KnexMixin(%) |> ContextMixin(%);
   return class ServiceTransaction extends mixins {
     async transaction(callback) {
+      if (callback === null) {
+        this.context.set(TRANSACTION, undefined);
+        return;
+      }
       const knex = this.knex;
       const context = this.context;
-      const trx = context.get("transaction");
+      const trx = context.get(TRANSACTION);
       try {
-        return await this.context(
-          async (ctx) =>
-            (trx || knex).transaction(async (transaction) => {
-              ctx.set("transaction", transaction);
-              try {
-                return await callback();
-              } finally {
-                await this.criticalSection();
-              }
-            }),
-          true
+        return (trx || knex).transaction((transaction) =>
+          this.context(async (ctx) => {
+            ctx.set(TRANSACTION, transaction);
+            return await callback();
+          }, true)
         );
       } catch (error) {
         if (trx && !trx.isCompleted()) {
@@ -30,6 +28,9 @@ function ServiceTransactionMixin(superclass) {
         }
         throw error;
       }
+    }
+    get transactionOrKnex() {
+      return this.context.get(TRANSACTION) || this.knex;
     }
   };
 }

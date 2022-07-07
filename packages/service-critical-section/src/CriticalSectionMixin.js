@@ -7,9 +7,6 @@ function CriticalSectionMixin(superclass) {
   return class CriticalSection extends mixins {
     #promises = new Map();
     criticalSection(callback) {
-      if (!callback) {
-        return Promise.all(this.#promises).then(() => undefined);
-      }
       let deferred;
       const key = Symbol();
       const promise = new Promise(

@@ -1,2 +1,2 @@
 export ModelMixin from "./ModelMixin.js";
-export TransactionMixin from "./TransactionMixin.js";
+export TransactionMixin, { TRANSACTION } from "./TransactionMixin.js";

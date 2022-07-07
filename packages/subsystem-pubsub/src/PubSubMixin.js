@@ -1,12 +1,12 @@
 import dedupe from "@yadah/dedupe-mixin";
-import CriticalSectionMixin from "@yadah/service-critical-section";
 import ListenerMixin from "@yadah/service-listener";
+import { ContextMixin } from "@yadah/subsystem-context";
 import camelcase from "camelcase";
 import assert from "node:assert";
 import PubSubAgent from "./PubSub.js";
 
 function PubSubMixin(superclass) {
-  const mixins = superclass |> CriticalSectionMixin(%) |> ListenerMixin(%);
+  const mixins = superclass |> ContextMixin(%) |> ListenerMixin(%);
   return class PubSub extends mixins {
     /**
      * PubSub subsystem instance
@@ -43,8 +43,9 @@ function PubSubMixin(superclass) {
           return;
         }
         const channel = state.id || state.channel || id;
-        const trx = this.context.get("transaction");
-        this.criticalSection(this.pubsub.publish(channel, payload, trx));
+        return this.context(() =>
+          this.pubsub.publish(channel, payload, this.transactionOrKnex)
+        );
       };
       handler.map = (map) => {
         const _map = state.map;

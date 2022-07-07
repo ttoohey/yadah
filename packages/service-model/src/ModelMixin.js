@@ -42,7 +42,7 @@ function ModelMixin(superclass, Model) {
       if (id instanceof Model) {
         return id;
       }
-      const trx = this.context.get("transaction");
+      const trx = this.transactionOrKnex;
       const query = Model.query(trx);
       if (typeof id === "object") {
         query.where(id).throwIfNotUnique().first();
@@ -56,17 +56,17 @@ function ModelMixin(superclass, Model) {
     }
 
     list(criteria = {}) {
-      const trx = this.context.get("transaction");
+      const trx = this.transactionOrKnex;
       return Model.query(trx).scope(criteria);
     }
 
     one(criteria = {}) {
-      const trx = this.context.get("transaction");
+      const trx = this.transactionOrKnex;
       return Model.query(trx).scope(criteria).first();
     }
 
     many(list, callback) {
-      const trx = this.context.get("transaction");
+      const trx = this.transactionOrKnex;
       const [first, ...rest] = list;
       const alias = `:${Model.tableName}`;
       const query = Model.query(trx);
@@ -80,38 +80,38 @@ function ModelMixin(superclass, Model) {
     }
 
     async count(criteria = {}) {
-      const trx = this.context.get("transaction");
+      const trx = this.transactionOrKnex;
       const [{ count }] = await Model.query(trx).scope(criteria).count();
       return count;
     }
 
     async sum(field, criteria = {}) {
-      const trx = this.context.get("transaction");
+      const trx = this.transactionOrKnex;
       const [{ sum }] = await Model.query(trx).scope(criteria).sum(field);
       return sum;
     }
 
     async avg(field, criteria = {}) {
-      const trx = this.context.get("transaction");
+      const trx = this.transactionOrKnex;
       const [{ avg }] = await Model.query(trx).scope(criteria).avg(field);
       return avg;
     }
 
     async min(field, criteria = {}) {
-      const trx = this.context.get("transaction");
+      const trx = this.transactionOrKnex;
       const [{ min }] = await Model.query(trx).scope(criteria).min(field);
       return min;
     }
 
     async max(field, criteria = {}) {
-      const trx = this.context.get("transaction");
+      const trx = this.transactionOrKnex;
       const [{ max }] = await Model.query(trx).scope(criteria).max(field);
       return max;
     }
 
     async create(json, onCreate) {
       return this.transaction(async () => {
-        const trx = this.context.get("transaction");
+        const trx = this.transactionOrKnex;
         const queryContext = this.context.get("queryContext");
         const model = await (async () => {
           const result = await Model.query(trx)
@@ -158,13 +158,13 @@ function ModelMixin(superclass, Model) {
           stream.destroy(e);
         }
       })();
-      const trx = this.context.get("transaction");
+      const trx = this.transactionOrKnex;
       return Model.copyFromCsv(stream, columns, trx);
     }
 
     async update(id, json, onUpdate) {
       return this.transaction(async () => {
-        const trx = this.context.get("transaction");
+        const trx = this.transactionOrKnex;
         const queryContext = this.context.get("queryContext");
         const [model, oldModel] = await (async () => {
           const oldModel = await this.find(id);
@@ -195,7 +195,7 @@ function ModelMixin(superclass, Model) {
 
     async delete(id, onDelete) {
       return this.transaction(async () => {
-        const trx = this.context.get("transaction");
+        const trx = this.transactionOrKnex;
         const queryContext = this.context.get("queryContext");
         const model = await (async () => {
           const model = await this.find(id);

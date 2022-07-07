@@ -1,12 +1,22 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 
+const CONTEXT = Symbol("CONTEXT");
+
 function createContext() {
   const asyncLocalStorage = new AsyncLocalStorage();
-  function context(callback, inherit = false) {
-    const store = inherit ? asyncLocalStorage.getStore() : undefined;
-    return asyncLocalStorage.run(new Map(store), () =>
-      callback(asyncLocalStorage.getStore())
-    );
+  function context(callback) {
+    const store = asyncLocalStorage.getStore();
+    const newStore = new Map(store);
+    newStore.set(CONTEXT, []);
+    const result = asyncLocalStorage.run(newStore, async () => {
+      const result = await callback(asyncLocalStorage.getStore());
+      await Promise.all(get(CONTEXT));
+      return result;
+    });
+    if (store) {
+      store.set(CONTEXT, store.get(CONTEXT).concat(result));
+    }
+    return result;
   }
   function set(key, value) {
     const store = asyncLocalStorage.getStore();
