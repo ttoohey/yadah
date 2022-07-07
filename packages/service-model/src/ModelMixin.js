@@ -7,6 +7,7 @@ import { stringify } from "csv-stringify";
 import { isEqual } from "lodash-es";
 import assert from "node:assert";
 import { once } from "node:events";
+import NotUniqueMixin from "./NotUniqueMixin.js";
 import TransactionMixin from "./TransactionMixin.js";
 
 async function* makeIterable(data) {
@@ -27,6 +28,11 @@ function ModelMixin(superclass, Model) {
   if (!IteratorMixin.extends(Model)) {
     assert.fail(
       `"class ${Model.name}" must inherit Iterator mixin from "@yadah/objection-iterator"`
+    );
+  }
+  if (!NotUniqueMixin.extends(Model)) {
+    assert.fail(
+      `"class ${Model.name}" must inherit NotUniqueMixin mixin from "@yadah/service-model"`
     );
   }
 
@@ -120,7 +126,7 @@ function ModelMixin(superclass, Model) {
             .returning("id");
           const model = await this.find(result.$id());
           if (onCreate instanceof Function) {
-            await onCreate(model);
+            return (await onCreate(model)) || model;
           }
           return model;
         })();
@@ -219,7 +225,7 @@ function ModelMixin(superclass, Model) {
     async upsert(key, json) {
       const model = await this.find(key, { allowNotFound: true });
       return model
-        ? await this.update(model.$id(), json)
+        ? await this.update(model, json)
         : await this.create({ ...key, ...json });
     }
   };
