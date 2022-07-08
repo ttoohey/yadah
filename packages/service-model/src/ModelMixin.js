@@ -7,12 +7,16 @@ import { stringify } from "csv-stringify";
 import { isEqual } from "lodash-es";
 import assert from "node:assert";
 import { once } from "node:events";
+import { Readable } from "node:stream";
 import NotUniqueMixin from "./NotUniqueMixin.js";
 import TransactionMixin from "./TransactionMixin.js";
 
 async function* makeIterable(data) {
   if (data instanceof Function) {
     data = data();
+  }
+  if (data instanceof Readable) {
+    return data.iterator();
   }
   for await (const item of data) {
     yield item;

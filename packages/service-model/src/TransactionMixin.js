@@ -10,14 +10,13 @@ function TransactionMixin(superclass) {
     get transaction() {
       return async (callback) => {
         const knex = this.knex;
-        const context = this.context;
-        const trx = context.get(TRANSACTION);
+        const trx = this.context.get(TRANSACTION);
         try {
-          return (trx || knex).transaction((transaction) =>
-            this.context(async (ctx) => {
-              ctx.set(TRANSACTION, transaction);
-              return await callback();
-            }, true)
+          return await (trx || knex).transaction((trx) =>
+            this.context(() => {
+              this.transaction = trx;
+              return callback();
+            })
           );
         } catch (error) {
           if (trx && !trx.isCompleted()) {

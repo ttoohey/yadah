@@ -41,7 +41,6 @@
   },
   "dependencies": {
     "@yadah/dedupe-mixin": "*",
-    "@yadah/subsystem-logger": "*",
     "cron": "^2.0.0",
     "cron-time-generator": "^1.3.0"
   }
