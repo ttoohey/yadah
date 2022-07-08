@@ -1,15 +1,19 @@
+import EventEmitter from "node:events";
 import { CronJob } from "cron";
 import cronTime from "cron-time-generator";
 
-class Scheduler {
+class Scheduler extends EventEmitter {
   #cronTime;
   #cronEvery;
   #runOnInit;
   #timeZone;
   #callbacks;
   #cronJobs;
+  #thisArg;
+  #id;
 
   constructor() {
+    super(...arguments);
     this.#cronTime = cronTime;
     this.#runOnInit = false;
     this.#timeZone = process.env.TZ;
@@ -17,32 +21,35 @@ class Scheduler {
     this.#cronJobs = [];
   }
 
-  start(thisObj, onStart, onComplete) {
+  get jobs() {
+    return this.#cronJobs;
+  }
+
+  start() {
+    const self = this;
     for (const callback of this.#callbacks) {
-      const onTick = function (onComplete) {
-        // note: must not be an arrow function
-        onStart.call(this, callback.name);
-        try {
-          Promise.resolve(callback.call(thisObj, this))
-            .then((result) =>
-              onComplete.call(this, callback.name, [undefined, result])
-            )
-            .catch((error) =>
-              onComplete.call(this, callback.name, [error], this)
-            );
-        } catch (error) {
-          onComplete.call(this, callback.name, [error], this);
-        }
-      };
-      const cronJob = new CronJob({
+      const id =
+        this.#id instanceof Function
+          ? this.#id(callback.name, self.#thisArg?.constructor.name)
+          : this.#id ||
+            (self.#thisArg ? self.#thisArg.constructor.name + "." : "") +
+              (callback.name || "[Anonymous]");
+      const job = new CronJob({
         start: true,
         cronTime: this.#cronTime,
         runOnInit: this.#runOnInit,
         timeZone: this.#timeZone,
-        onTick,
-        onComplete,
+        onTick: async function () {
+          try {
+            self.emit("start", id);
+            await callback.bind(self.#thisArg)(this);
+            self.emit("finish", id);
+          } catch (error) {
+            self.emit("error", error, id);
+          }
+        },
       });
-      this.#cronJobs.push(cronJob);
+      this.#cronJobs.push(job);
     }
   }
 
@@ -55,6 +62,16 @@ class Scheduler {
 
   do(callback) {
     this.#callbacks.push(callback);
+    return this;
+  }
+
+  bindTo(thisArg) {
+    this.#thisArg = thisArg;
+    return this;
+  }
+
+  id(id) {
+    this.#id = id;
     return this;
   }
 

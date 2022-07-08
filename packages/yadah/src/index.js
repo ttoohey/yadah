@@ -1,7 +1,6 @@
 export ServiceManager, { Service } from "@yadah/service-manager";
 export CriticalSectionMixin from "@yadah/service-critical-section";
 export ListenerMixin from "@yadah/service-listener";
-export ScheduleMixin from "@yadah/service-schedule";
 export {
   ModelMixin,
   TRANSACTION,
@@ -16,4 +15,5 @@ export createMessageQueue, {
   MessageQueueMixin,
 } from "@yadah/subsystem-message-queue";
 export createPubSub, { PubSubMixin } from "@yadah/subsystem-pubsub";
+export createSchedule, { ScheduleMixin } from "@yadah/subsystem-schedule";
 export Model from "./Model.js";

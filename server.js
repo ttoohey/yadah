@@ -31,10 +31,6 @@ concurrently(
       name: "service-model",
     },
     {
-      command: "npm start -w @yadah/service-schedule",
-      name: "service-schedule",
-    },
-    {
       command: "npm start -w @yadah/subsystem-context",
       name: "subsystem-context",
     },
@@ -53,6 +49,10 @@ concurrently(
     {
       command: "npm start -w @yadah/subsystem-pubsub",
       name: "subsystem-pubsub",
+    },
+    {
+      command: "npm start -w @yadah/subsystem-schedule",
+      name: "subsystem-schedule",
     },
     {
       command: "npm start -w @yadah/yadah",

@@ -46,13 +46,13 @@
     "@yadah/service-manager": "*",
     "@yadah/service-critical-section": "*",
     "@yadah/service-listener": "*",
-    "@yadah/service-schedule": "*",
     "@yadah/service-model": "*",
     "@yadah/subsystem-context": "*",
     "@yadah/subsystem-knex": "*",
     "@yadah/subsystem-logger": "*",
     "@yadah/subsystem-message-queue": "*",
     "@yadah/subsystem-pubsub": "*",
+    "@yadah/subsystem-schedule": "*",
     "objection": "^3.0.1"
   }
 }

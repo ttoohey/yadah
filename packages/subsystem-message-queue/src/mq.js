@@ -8,7 +8,12 @@ class MessageQueue {
     this.knex = options.knex;
     this.logger = new Logger((scope) => {
       return (level, message, meta) =>
-        options.logger.log({ level, message, ...meta, scope });
+        options.logger.log({
+          level,
+          message: `mq: ${message}`,
+          ...meta,
+          scope,
+        });
     });
   }
 
