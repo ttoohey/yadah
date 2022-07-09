@@ -1,4 +1,4 @@
-export ServiceManager, { Service } from "@yadah/service-manager";
+export DataManager, { Service } from "@yadah/data-manager";
 export CriticalSectionMixin from "@yadah/service-critical-section";
 export ListenerMixin from "@yadah/service-listener";
 export {

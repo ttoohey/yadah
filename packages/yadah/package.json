@@ -41,9 +41,9 @@
     "rimraf": "^3.0.2"
   },
   "dependencies": {
-    "@yadah/objection-scope": "*",
+    "@yadah/data-manager": "*",
     "@yadah/objection-iterator": "*",
-    "@yadah/service-manager": "*",
+    "@yadah/objection-scope": "*",
     "@yadah/service-critical-section": "*",
     "@yadah/service-listener": "*",
     "@yadah/service-model": "*",

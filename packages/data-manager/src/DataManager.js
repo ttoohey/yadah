@@ -4,7 +4,7 @@ const isServiceInstance = (service) => service instanceof Service;
 const isServiceClass = (ServiceClass) =>
   Object.isPrototypeOf.call(Service, ServiceClass);
 
-export default class ServiceManager {
+export default class DataManager {
   #services;
   #modules;
   #subsystems;

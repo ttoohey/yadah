@@ -39,9 +39,9 @@
     "rimraf": "^3.0.2"
   },
   "dependencies": {
+    "@yadah/data-manager": "*",
     "@yadah/dedupe-mixin": "*",
     "@yadah/service-listener": "*",
-    "@yadah/service-manager": "*",
     "@yadah/subsystem-context": "*",
     "graphile-worker": "^0.13.0"
   }

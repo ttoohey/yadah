@@ -3,12 +3,12 @@ import concurrently from "concurrently";
 concurrently(
   [
     {
-      command: "npm start -w @yadah/dedupe-mixin",
-      name: "dedupe-mixin",
+      command: "npm start -w @yadah/data-manager",
+      name: "data-manager",
     },
     {
-      command: "npm start -w @yadah/service-manager",
-      name: "service-manager",
+      command: "npm start -w @yadah/dedupe-mixin",
+      name: "dedupe-mixin",
     },
     {
       command: "npm start -w @yadah/objection-iterator",
