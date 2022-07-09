@@ -1,5 +1,5 @@
 import winston from "winston";
-import { pretty } from "./format.js";
+import { pretty, json } from "./format.js";
 
 export default function createLogger(options) {
   const logger = winston.createLogger({
@@ -8,7 +8,7 @@ export default function createLogger(options) {
   });
   logger.add(
     new winston.transports.Console({
-      format: options.pretty ? pretty() : winston.format.logstash(),
+      format: options.pretty ? pretty() : json(),
       silent: options?.silent,
     })
   );

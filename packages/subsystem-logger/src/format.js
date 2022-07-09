@@ -2,6 +2,8 @@ import { inspect } from "node:util";
 import winston from "winston";
 import { SPLAT, MESSAGE } from "triple-beam";
 import chalk from "chalk";
+import stringify from "safe-stable-stringify";
+import ErrorStackParser from "error-stack-parser";
 
 export function pretty(...args) {
   return winston.format.combine(
@@ -23,4 +25,33 @@ export function pretty(...args) {
       return info;
     })(...args)
   );
+}
+
+export function json(...args) {
+  return winston.format((info) => {
+    const splats = info[SPLAT] || [];
+    const splatMessages = splats
+      .filter((s) => s !== null && typeof s === "object" && s.message)
+      .map((s) => s.message);
+    const len = splatMessages.reduce((len, msg) => len + msg.length + 1, 0);
+    const message = info.message.slice(0, info.message.length - len);
+    info[MESSAGE] = stringify({
+      timestamp: new Date().toISOString(),
+      level: info.level,
+      message: message,
+      ...(info[SPLAT]?.length > 0
+        ? {
+            metadata: info[SPLAT].map((val) =>
+              val instanceof Error
+                ? {
+                    error: val.toString(),
+                    stack: ErrorStackParser.parse(val),
+                  }
+                : val
+            ),
+          }
+        : {}),
+    });
+    return info;
+  })(...args);
 }
