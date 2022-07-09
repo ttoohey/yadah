@@ -65,8 +65,12 @@ export default class Schedule {
 
   async stop() {
     for (const scheduler of this.schedulers) {
-      const [id, job] = scheduler.stop();
-      await this.updateJob(id, job, "stopped");
+      try {
+        const [id, job] = scheduler.stop();
+        await this.updateJob(id, job, "stopped");
+      } catch (e) {
+        continue;
+      }
     }
     this.running = false;
     this.schedulers.clear();

@@ -11,13 +11,14 @@ class Scheduler extends EventEmitter {
   #cronJob;
   #thisArg;
   #id;
+  #proxy;
 
   constructor() {
     super(...arguments);
     this.#cronTime = null;
     this.#runOnInit = false;
     this.#timeZone = process.env.TZ;
-    const self = new Proxy(this, {
+    const proxy = new Proxy(this, {
       get(target, prop) {
         const reflected = Reflect.get(...arguments);
         if (reflected instanceof Function) {
@@ -30,20 +31,21 @@ class Scheduler extends EventEmitter {
         if (ch instanceof Function) {
           return (...args) => {
             target.#cronTime = ch.call(target.#cronTime, ...args);
-            return self;
+            return proxy;
           };
         }
         const fn = cronTime[prop];
         if (fn instanceof Function) {
           return (...args) => {
             target.#cronTime = fn.call(cronTime, ...args);
-            return self;
+            return proxy;
           };
         }
         return fn;
       },
     });
-    return self;
+    this.#proxy = proxy.bind(this);
+    return proxy;
   }
 
   then(resolve, reject) {
@@ -52,10 +54,10 @@ class Scheduler extends EventEmitter {
       const callback = this.#callback;
       const id =
         this.#id instanceof Function
-          ? this.#id(callback.name, self.#thisArg?.constructor.name)
+          ? this.#id(callback?.name, self.#thisArg?.constructor.name)
           : this.#id ||
             (self.#thisArg ? self.#thisArg.constructor.name + "." : "") +
-              (callback.name || "[Anonymous]");
+              (callback?.name || "[Anonymous]");
       const job = new CronJob({
         start: false,
         cronTime: this.#cronTime,
@@ -98,32 +100,32 @@ class Scheduler extends EventEmitter {
 
   do(callback) {
     this.#callback = callback;
-    return this;
+    return this.#proxy;
   }
 
   bindTo(thisArg) {
     this.#thisArg = thisArg;
-    return this;
+    return this.#proxy;
   }
 
   id(id) {
     this.#id = id;
-    return this;
+    return this.#proxy;
   }
 
-  get onInit() {
+  onInit() {
     this.#runOnInit = true;
-    return this;
+    return this.#proxy;
   }
 
   timeZone(timeZone) {
     this.#timeZone = timeZone;
-    return this;
+    return this.#proxy;
   }
 
   at(cronTime) {
     this.#cronTime = cronTime;
-    return this;
+    return this.#proxy;
   }
 }
 
