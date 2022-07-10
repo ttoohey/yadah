@@ -47,6 +47,7 @@
     "@yadah/subsystem-context": "*",
     "@yadah/subsystem-knex": "*",
     "csv-stringify": "^6.1.0",
-    "lodash-es": "^4.17.21"
+    "lodash-es": "^4.17.21",
+    "objection": "^3.0.1"
   }
 }

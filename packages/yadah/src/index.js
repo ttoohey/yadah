@@ -7,6 +7,7 @@ export {
   TransactionMixin,
   NotUniqueError,
   NotUniqueMixin,
+  Model,
 } from "@yadah/service-model";
 export createContext, { ContextMixin } from "@yadah/subsystem-context";
 export createKnex, { KnexMixin } from "@yadah/subsystem-knex";
@@ -16,4 +17,3 @@ export createMessageQueue, {
 } from "@yadah/subsystem-message-queue";
 export createPubSub, { PubSubMixin } from "@yadah/subsystem-pubsub";
 export createSchedule, { ScheduleMixin } from "@yadah/subsystem-schedule";
-export Model from "./Model.js";

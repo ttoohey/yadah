@@ -43,6 +43,7 @@
     "@yadah/dedupe-mixin": "*",
     "@yadah/service-listener": "*",
     "@yadah/subsystem-context": "*",
-    "graphile-worker": "^0.13.0"
+    "graphile-worker": "^0.13.0",
+    "pg": "^8.7.3"
   }
 }
