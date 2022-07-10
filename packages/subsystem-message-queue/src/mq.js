@@ -1,4 +1,5 @@
 import { run, makeWorkerUtils, Logger } from "graphile-worker";
+import DuckPgPool from "./DuckPgPool.js";
 
 class MessageQueue {
   knex;
@@ -26,6 +27,7 @@ class MessageQueue {
   }
 
   async start() {
+    const knex = this.knex;
     const logger = this.logger;
     const worker = await makeWorkerUtils({});
     await worker.migrate();
@@ -36,8 +38,9 @@ class MessageQueue {
       ])
     );
     const noHandleSignals = true;
-    const pollInterval = 3000;
+    const pollInterval = 2000;
     this.runner = await run({
+      pgPool: new DuckPgPool(knex.client.pool),
       taskList,
       logger,
       noHandleSignals,
@@ -46,8 +49,10 @@ class MessageQueue {
   }
 
   async stop() {
-    await this.runner.stop();
-    delete this.runner;
+    if (this.runner) {
+      await this.runner.stop();
+      delete this.runner;
+    }
   }
 }
 
