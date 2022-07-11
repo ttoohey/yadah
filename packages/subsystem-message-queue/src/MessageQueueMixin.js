@@ -2,22 +2,28 @@ import dedupe from "@yadah/dedupe-mixin";
 import ListenerMixin from "@yadah/service-listener";
 import { Service } from "@yadah/data-manager";
 import { ContextMixin } from "@yadah/subsystem-context";
+import { TransactionMixin } from "@yadah/service-model";
 import assert from "node:assert";
 
 function MessageQueueMixin(superclass) {
-  const mixins = superclass |> ContextMixin(%) |> ListenerMixin(%);
+  const mixins =
+    superclass |> ContextMixin(%) |> ListenerMixin(%) |> TransactionMixin(%);
   return class MessageQueue extends mixins {
     /**
      * MessageQueue subsystem instance
      *
      * @type {object}
      */
-    mq;
+    #mq;
 
     constructor({ mq, ...subsystems }) {
       assert(mq, `"mq" subsystem must be provided`);
       super(subsystems);
-      this.mq = mq;
+      this.#mq = mq;
+    }
+
+    get mq() {
+      return this.#mq;
     }
 
     get queue() {

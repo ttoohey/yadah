@@ -1,8 +1,8 @@
-# yadah/service-manager
+# yadah/data-manager
 
-Provides the core service manager logic for configuring an application's
-data layer subsystems, and creating "service classes" to provide a standard way
-for front-ends to interact with data.
+Provides logic for configuring an application's data layer, and creating
+"service classes" to provide a standard way for front-ends to interact with
+subsystems.
 
 ## Usage
 
@@ -10,7 +10,7 @@ Create service classes
 
 ```js
 // my-package/services.js
-import { Service } from "@yadah/service-manager";
+import { Service } from "@yadah/data-manager";
 
 export class ServiceA extends Service {
   doATask() {
@@ -20,62 +20,65 @@ export class ServiceA extends Service {
 
 export class ServiceB extends Service {
   async doBTask() {
-    await this.knex("bData").insert({ text: "in doBTask" });
+    await this.knex("tableB").insert({ text: "in doBTask" });
   }
 }
 ```
 
-Create a service manager
+Create a data manager
 
 ```js
 // my-package/index.js
-import { ServiceManager } from "@yadah/service-manager";
+import DataManager from "@yadah/data-manager";
+import createLogger from "@yadah/subsystem-logger";
+import createKnex from "@yadah/subsystem-knex";
 import * as modules from "./services.js";
 
+// setup subsystems
 export const logger = createLogger(); // example
 export const knex = createKnex(); // example
-
 const subsystems = { logger, knex };
-const serviceManager = new ServiceManager(subsystems);
-export const services = serviceManager.boot(modules);
 
+// initialise and boot the data manager
+const dataManager = new DataManager(subsystems);
+export const services = dataManager.boot(modules);
+
+// life-cycle functions to start and stop subsystems and services
 export async function startup() {
-  await serviceManager.startup();
+  await dataManager.startup();
 }
 
 export async function shutdown() {
-  await serviceManager.shutdown();
+  await dataManager.shutdown();
   await knex.destroy();
 }
 ```
 
-Access service package exports
+Access data package exports
 
 ```js
 // other-package/example.js
-import { services } from "my-package";
+import { services, startup, shutdown } from "my-package";
 
+await startup();
 services.ServiceA.doATask();
 await services.ServiceB.doBTask();
+await shutdown();
 ```
 
 ## Mixins
 
 Mixins are used to create common logic for services.
 
-```js
-// my-package/BaseService.js
-import { mixin, Service } from "@yadah/service-manager";
-import Listener from "@yadah/service-listener";
-
-export class BaseService extends mixin(Service, Listener) {}
-```
+Example: the `ListenerMixin` will call `registerListeners()` during the `boot`
+lifecycle, and will automatically remove listeners during `shutdown`.
 
 ```js
 // my-package/SomeService.js
-import BaseService from "./BaseService.js";
+import { Service } from "@yadah/data-manager";
+import ListenerMixin from "@yadah/service-listener";
 
-export class SomeService extends BaseService {
+export class SomeService extends (Service |> ListenerMixin(%)) {
   registerListeners() {
     this.on("someEvent", () => this.handleEvent());
   }
@@ -89,42 +92,45 @@ export class SomeService extends BaseService {
 
 A mixin is a function that returns a class that extends a supplied class.
 
+The `dedupe()` function is a wrapper for mixin functions that ensures they will
+wrap a class only once. This allows mixin depdendencies to be well defined.
+
 ```js
 // my-package/SomeMixin.js
+import dedupe from "@yadah/dedupe-mixin";
 
-export default (SuperClass) =>
-  class extends SuperClass {
-    mixinFn() {
+function SomeMixin(superclass) {
+  return class Some extends superclass {
+    someMixinFn() {
       //
     }
   };
+}
+export default SomeMixin |> dedupe(%);
 ```
 
-A mixin can depend on another mixin by wrapping it with `mixin()`
+A mixin can depend on another mixin by extending the `superclass`:
 
 ```js
 // my-package/SomeMixin.js
-import { mixin } from "@yadah/service-manager";
-import DependantMixin from "other-package";
+import OtherMixin from "other-package";
 
-export default (SuperClass) =>
-  class extends mixin(SuperClass, DependantMixin) {};
-```
+fucntion SomeMixin(superclass) {
+  const mixins = superclass |> OtherMixin(%);
+  return class Some extends mixins {
+    someMixinFn() {
+      const dm = this.otherMixinFn();
+      //
+    }
+  }
+}
 
-To avoid `DependantMixin` from being "mixed" multiple times, it should name
-it's class.
-
-```js
-// other-package/DependantMixin.js
-export default (SuperClass) =>
-  class DependantMixin extends SuperClass {
-    // ... mixin logic ...
-  };
+export default SomeMixin |> dedupe(%);
 ```
 
 ## Service class life-cycle functions
 
-The base `Service` class provides three life-cycle functions:
+The `Service` class provides three life-cycle functions:
 
 1. `boot()`
 2. `startup()`
@@ -133,13 +139,14 @@ The base `Service` class provides three life-cycle functions:
 The `boot()` function is executed synchronously. All subsystems and other
 service classes are visible via `this`. This function is typically used to allow
 registering behaviours defined by mixins. `boot()` is called when the
-`ServiceManager.boot()` function is called - typically during the application's
-data-layer setup. `boot()` should be passed an array containing a list of
-"service classes" which will be created as singletons and stored on the
-`this.services` object.
+`DataManager.boot()` function is called - typically during the application's
+data-layer setup. `boot()` should be passed an object containing "service
+classes" which will be created as singletons and stored on the `this.services`
+object. `boot()` returns an object containing the service class singletons.
 
 The `startup()` function may be asynchronous. The `boot()` function should be
-called prior to `startup()`. This function is called when the
-`ServiceManager.startup()` function is called. Applications
+called prior to `startup()`. This function is called on each service class
+singleton when the `DataManager.startup()` function is called.
 
-The `shutdown()` function may be asynchronous.
+The `shutdown()` function may be asynchronous. This function is called on each
+service class singleton when the `DataManage.shutdown()` function is called.

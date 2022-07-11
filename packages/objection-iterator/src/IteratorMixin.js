@@ -6,7 +6,7 @@ function IteratorMixin(superclass) {
       return class extends super.QueryBuilder {
         async *[Symbol.asyncIterator]() {
           const modelClass = this.resultModelClass();
-          for await (const data of this.toKnexQuery().stream()) {
+          for await (const data of this.toKnexQuery().stream().iterator()) {
             const modelInstance = modelClass.fromJson(data);
             modelInstance.$afterFind(this.context());
             yield modelInstance;

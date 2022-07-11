@@ -20,6 +20,9 @@ class Scheduler extends EventEmitter {
     this.#timeZone = process.env.TZ;
     const proxy = new Proxy(this, {
       get(target, prop) {
+        if (prop === "onInit") {
+          return target[prop];
+        }
         const reflected = Reflect.get(...arguments);
         if (reflected instanceof Function) {
           return reflected.bind(target);
@@ -113,7 +116,7 @@ class Scheduler extends EventEmitter {
     return this.#proxy;
   }
 
-  onInit() {
+  get onInit() {
     this.#runOnInit = true;
     return this.#proxy;
   }

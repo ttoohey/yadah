@@ -6,12 +6,16 @@ function KnexMixin(superclass) {
     /**
      * Knex subsystem instance
      */
-    knex = null;
+    #knex = null;
 
     constructor({ knex, ...subsystems }) {
       assert(knex, `"knex" subsystem must be provided`);
       super(subsystems);
-      this.knex = knex;
+      this.#knex = knex;
+    }
+
+    get knex() {
+      return this.#knex;
     }
   };
 }

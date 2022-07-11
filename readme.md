@@ -29,6 +29,6 @@ npm test
 Or, for individual packages
 
 ```sh
-npm run -- workspace:service-manager test
-npm run -- workspace:service-manager test --watch
+npm run -- workspace:data-manager test
+npm run -- workspace:data-manager test --watch
 ```

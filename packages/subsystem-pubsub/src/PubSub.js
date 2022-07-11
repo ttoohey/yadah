@@ -1,5 +1,6 @@
 import assert from "node:assert";
 import { Hash } from "node:crypto";
+import { once } from "node:events";
 import { Readable } from "node:stream";
 
 const toClassid = (val) => {
@@ -13,6 +14,11 @@ const toClassid = (val) => {
 
 export default class PubSub {
   constructor(knex, { lockId, schema = "pubsub", channelPrefix = "pubsub" }) {
+    assert.equal(
+      knex.client.config.client,
+      "postgresql",
+      "pubsub: knex client must use postgresql adapter"
+    );
     this.knex = knex;
     this.classid = toClassid(lockId || this.constructor.name);
     this.schema = schema;
@@ -47,10 +53,10 @@ export default class PubSub {
     const classid = this.classid;
     const connection = this.connection;
     const schema = this.schema;
-    await connection.end();
-    await knex.client.releaseConnection(connection);
     delete this.connection;
     delete this.id;
+    await connection.end();
+    await knex.client.releaseConnection(connection);
     await knex.raw(
       `DELETE FROM "${schema}".listeners WHERE pg_try_advisory_xact_lock(?,id)`,
       [classid]
@@ -70,27 +76,35 @@ export default class PubSub {
       );
     }
     map.set(channel, map.get(channel).concat(stream));
+    stream.emit("pubsub:ready");
   }
   async #removeSubscription(stream, channel) {
-    const [connection, id] = await this.listen();
-    const map = this.#subscriptions;
-    const schema = this.schema;
-    if (!map.has(channel)) {
-      return;
-    }
-    const streams = map.get(channel).filter((s) => s !== stream);
-    if (streams.length === 0) {
-      map.delete(channel);
-    } else {
-      map.set(channel, streams);
-    }
-    if (map.size === 0) {
-      await this.unlisten();
-    } else {
-      await connection.query(
-        `UPDATE "${schema}".listeners SET channels=$1 WHERE id=$2`,
-        [Array.from(map.keys()), id]
-      );
+    try {
+      const [connection, id] = [this.connection, this.id];
+      if (!connection) {
+        return;
+      }
+      const map = this.#subscriptions;
+      const schema = this.schema;
+      if (!map.has(channel)) {
+        return;
+      }
+      const streams = map.get(channel).filter((s) => s !== stream);
+      if (streams.length === 0) {
+        map.delete(channel);
+      } else {
+        map.set(channel, streams);
+      }
+      if (map.size === 0) {
+        await this.unlisten();
+      } else {
+        await connection.query(
+          `UPDATE "${schema}".listeners SET channels=$1 WHERE id=$2`,
+          [Array.from(map.keys()), id]
+        );
+      }
+    } finally {
+      stream.emit("pubsub:end");
     }
   }
 
@@ -123,6 +137,11 @@ export default class PubSub {
     stream.on("close", () => this.#removeSubscription(stream, channel));
     stream.on("error", () => this.#removeSubscription(stream, channel));
     return stream;
+  }
+
+  unsubscribe(stream) {
+    stream.push(null);
+    return once(stream, "pubsub:end");
   }
 
   async publish(channel, data, transactionOrKnex) {

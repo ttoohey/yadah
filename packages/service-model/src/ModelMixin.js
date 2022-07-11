@@ -130,7 +130,7 @@ function ModelMixin(superclass, Model) {
             .returning("id");
           const model = await this.find(result.$id());
           if (onCreate instanceof Function) {
-            return (await onCreate(model)) || model;
+            return (await onCreate(model, trx)) || model;
           }
           return model;
         })();
@@ -187,7 +187,7 @@ function ModelMixin(superclass, Model) {
           if (!(onUpdate instanceof Function)) {
             return [model, oldModel];
           }
-          const result = await onUpdate([model, oldModel]);
+          const result = await onUpdate([model, oldModel], trx);
           if (Boolean(result) === result && result && model === oldModel) {
             model = model.$clone();
           }
@@ -214,7 +214,7 @@ function ModelMixin(superclass, Model) {
             .findById(model.$id())
             .delete();
           if (onDelete instanceof Function) {
-            const result = await onDelete(model);
+            const result = await onDelete(model, trx);
             if (result) {
               return result;
             }

@@ -6,12 +6,16 @@ function LoggerMixin(superclass) {
     /**
      * Logger subsystem instance
      */
-    logger;
+    #logger;
 
     constructor({ logger, ...subsystems }) {
       assert(logger, `"logger" subsystem must be provided`);
       super(subsystems);
-      this.logger = logger;
+      this.#logger = logger;
+    }
+
+    get logger() {
+      return this.#logger;
     }
   };
 }

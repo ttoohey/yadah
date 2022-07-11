@@ -11,7 +11,7 @@ function PubSubMixin(superclass) {
     /**
      * PubSub subsystem instance
      */
-    pubsub = null;
+    #pubsub = null;
 
     constructor({ pubsub, ...subsystems }) {
       assert(
@@ -19,7 +19,11 @@ function PubSubMixin(superclass) {
         `"pubsub" subsystem must be provided`
       );
       super(subsystems);
-      this.pubsub = pubsub;
+      this.#pubsub = pubsub;
+    }
+
+    get pubsub() {
+      return this.#pubsub;
     }
 
     get publish() {

@@ -6,12 +6,16 @@ function ContextMixin(superclass) {
     /**
      * Context subsystem instance
      */
-    context = null;
+    #context = null;
 
     constructor({ context, ...subsystems }) {
       assert(context, `"context" subsystem must be provided`);
       super(subsystems);
-      this.context = context;
+      this.#context = context;
+    }
+
+    get context() {
+      return this.#context;
     }
   };
 }

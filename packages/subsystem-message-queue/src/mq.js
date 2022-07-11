@@ -1,11 +1,19 @@
 import { run, makeWorkerUtils, Logger } from "graphile-worker";
 import DuckPgPool from "./DuckPgPool.js";
+import EventEmitter from "node:events";
+import assert from "node:assert";
 
-class MessageQueue {
+class MessageQueue extends EventEmitter {
   knex;
   taskList = {};
 
   constructor(options) {
+    super();
+    assert.equal(
+      options.knex.client.config.client,
+      "postgresql",
+      "mq: knex client must use postgresql adapter"
+    );
     this.knex = options.knex;
     this.logger = new Logger((scope) => {
       return (level, message, meta) =>
@@ -27,10 +35,15 @@ class MessageQueue {
   }
 
   async start() {
+    if (this.runner) {
+      throw new Error("MessageQueue has already started");
+    }
     const knex = this.knex;
     const logger = this.logger;
-    const worker = await makeWorkerUtils({});
+    const pgPool = new DuckPgPool(knex.client.pool);
+    const worker = await makeWorkerUtils({ pgPool });
     await worker.migrate();
+    await worker.release();
     const taskList = Object.fromEntries(
       Object.entries(this.taskList).map(([taskId, handler]) => [
         taskId,
@@ -40,19 +53,21 @@ class MessageQueue {
     const noHandleSignals = true;
     const pollInterval = 2000;
     this.runner = await run({
-      pgPool: new DuckPgPool(knex.client.pool),
+      pgPool,
       taskList,
       logger,
       noHandleSignals,
       pollInterval,
+      events: this,
     });
   }
 
   async stop() {
-    if (this.runner) {
-      await this.runner.stop();
-      delete this.runner;
+    if (!this.runner) {
+      return;
     }
+    await this.runner.stop();
+    delete this.runner;
   }
 }
 
