@@ -1,6 +1,6 @@
 # Yadah PubSub subsystem
 
-A [Yadah](https://www.npm.com/packages/@yadah/yadah) subsystem and Service class
+A [Yadah](https://www.npmjs.com/packages/@yadah/yadah) subsystem and Service class
 mixin that provides Pub/Sub functionality.
 
 ## Basic usage

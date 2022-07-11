@@ -1,6 +1,6 @@
 # Yadah Context subsystem
 
-A [Yadah](https://www.npm.com/packages/@yadah/yadah) subsystem and Service class
+A [Yadah](https://www.npmjs.com/packages/@yadah/yadah) subsystem and Service class
 mixin that provides a way to access shared "context" values in promise chains.
 
 ## Basic usage

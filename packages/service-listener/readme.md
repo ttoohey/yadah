@@ -1,6 +1,6 @@
 # Yadah Listener mixin
 
-A mixin for [Yadah](https://www.npm.com/packages/@yadah/yadah) Service classes
+A mixin for [Yadah](https://www.npmjs.com/packages/@yadah/yadah) Service classes
 adding the `registerListeners()` method. It provides a standardised way for
 Service classes to register event handlers.
 

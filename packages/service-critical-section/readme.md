@@ -1,6 +1,6 @@
 # Yadah Critical Section mixin
 
-A mixin for [Yadah](https://www.npm.com/packages/@yadah/yadah) Service classes
+A mixin for [Yadah](https://www.npmjs.com/packages/@yadah/yadah) Service classes
 that provides a way to run asynchronous code which will be allowed to complete
 prior to a process exiting. This helps to ensure that data will be
 consistent across different services even in the event that a service is being

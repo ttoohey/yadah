@@ -1,6 +1,6 @@
 # Yadah Model mixin
 
-A mixin for [Yadah](https://www.npm.com/packages/@yadah/yadah) Service classes
+A mixin for [Yadah](https://www.npmjs.com/packages/@yadah/yadah) Service classes
 that adds methods for database access via an
 [Objection.js](https://vincit.github.io/objection.js/) model.
 
@@ -81,7 +81,7 @@ node === found; // true
 
 ### list(criteria)
 
-Accepts a [`Model.scope()`](https://www.npm.com/packages/@yadah/objection-scope)
+Accepts a [`Model.scope()`](https://www.npmjs.com/packages/@yadah/objection-scope)
 criteria object.
 
 Returns a `QueryBuilder` instance that resolves with an array of records
