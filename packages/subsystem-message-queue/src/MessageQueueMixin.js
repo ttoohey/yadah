@@ -1,8 +1,8 @@
+import { Service } from "@yadah/data-manager";
 import dedupe from "@yadah/dedupe-mixin";
 import ListenerMixin from "@yadah/service-listener";
-import { Service } from "@yadah/data-manager";
-import { ContextMixin } from "@yadah/subsystem-context";
 import { TransactionMixin } from "@yadah/service-model";
+import { ContextMixin } from "@yadah/subsystem-context";
 import assert from "node:assert";
 
 function MessageQueueMixin(superclass) {
