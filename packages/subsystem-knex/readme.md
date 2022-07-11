@@ -39,3 +39,22 @@ provides access to the `knex` instance.
 
 An error will be thrown if no `knex` subsystem is provided during the `boot`
 lifecycle.
+
+## TransactionMixin
+
+The `TransactionMixin` function will add properties to service classes to run
+database transactions.
+
+### `transaction(callback)`
+
+Starts a knex transaction and calls the provided callback. The knex transaction
+is added to the context and is available via the `transactionOrKnex`
+property or via the callback's first argument.
+
+The knex transaction will be completed when the callback's returned promise
+resolves. If the callback throws an error, or returns a rejected promise the
+transaction will be aborted.
+
+The `transaction` property is also a setter to allow changing the context's
+transaction value (for example, to create a child context that performs
+queries outside the transaction).

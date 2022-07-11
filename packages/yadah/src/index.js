@@ -6,11 +6,13 @@ export {
   ModelMixin,
   NotUniqueError,
   NotUniqueMixin,
-  TRANSACTION,
-  TransactionMixin,
 } from "@yadah/service-model";
 export createContext, { ContextMixin } from "@yadah/subsystem-context";
-export createKnex, { KnexMixin } from "@yadah/subsystem-knex";
+export createKnex, {
+  KnexMixin,
+  TRANSACTION,
+  TransactionMixin,
+} from "@yadah/subsystem-knex";
 export createLogger, { LoggerMixin } from "@yadah/subsystem-logger";
 export createMessageQueue, {
   MessageQueueMixin,

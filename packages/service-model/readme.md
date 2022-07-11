@@ -4,7 +4,7 @@ A mixin for [Yadah](https://www.npmjs.com/packages/@yadah/yadah) Service classes
 that adds methods for database access via an
 [Objection.js](https://vincit.github.io/objection.js/) model.
 
-Basic usage
+## Basic usage
 
 ```js
 import ModelMixin, { Model } from "@yadah/service-model";
@@ -308,13 +308,13 @@ await App.services.MyService.copyFrom([{ foo: "bar", bar: "baz" }]);
 // 1
 ```
 
-Note: no events are emitted, and no hooks are run.
+Note: no events are emitted.
 
 ## Transactions
 
 All functions will attempt to use the current context's transaction.
 
-The mutating functions will wrap all logic in a transaction
+The mutating functions wrap all logic in a transaction.
 
 To run queries in a transaction wrap them in a call to the `transaction()`
 method.

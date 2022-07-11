@@ -2,14 +2,13 @@ import dedupe from "@yadah/dedupe-mixin";
 import IteratorMixin from "@yadah/objection-iterator";
 import { ScopeMixin } from "@yadah/objection-scope";
 import { ContextMixin } from "@yadah/subsystem-context";
-import { KnexMixin } from "@yadah/subsystem-knex";
+import { KnexMixin, TransactionMixin } from "@yadah/subsystem-knex";
 import { stringify } from "csv-stringify";
 import { isEqual } from "lodash-es";
 import assert from "node:assert";
 import { once } from "node:events";
 import { Readable } from "node:stream";
 import NotUniqueMixin from "./NotUniqueMixin.js";
-import TransactionMixin from "./TransactionMixin.js";
 
 async function* makeIterable(data) {
   if (data instanceof Function) {

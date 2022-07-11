@@ -141,14 +141,6 @@ as having a unique result.
 A mixin for Objection.js models which adds a `.throwIfNotUnique()` function to
 query builder instances.
 
-### `TRANSACTION`
-
-A symbol used to lookup the current knex transaction in a promise-chain context.
-
-### `TransactionMixin`
-
-A mixin for Yadah service classes which allows creating database transactions.
-
 ## subsystem-context
 
 https://www.npmjs.com/package/@yadah/subsystem-context
@@ -174,6 +166,14 @@ A function to create a [knex](https://knexjs.org) instance.
 
 A mixin for Yadah service classes which provides access to the application's
 knex instance.
+
+### `TRANSACTION`
+
+A symbol used to lookup the current knex transaction in a promise-chain context.
+
+### `TransactionMixin`
+
+A mixin for Yadah service classes which allows creating database transactions.
 
 ## subsystem-logger
 

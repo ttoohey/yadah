@@ -1,6 +1,6 @@
 import dedupe from "@yadah/dedupe-mixin";
 import { ContextMixin } from "@yadah/subsystem-context";
-import { KnexMixin } from "@yadah/subsystem-knex";
+import KnexMixin from "./KnexMixin.js";
 
 export const TRANSACTION = Symbol("TRANSACTION");
 
@@ -15,7 +15,7 @@ function TransactionMixin(superclass) {
           return await (trx || knex).transaction((trx) =>
             this.context(() => {
               this.transaction = trx;
-              return callback();
+              return callback(trx);
             })
           );
         } catch (error) {
