@@ -1,7 +1,7 @@
 import { Service } from "@yadah/data-manager";
 import dedupe from "@yadah/dedupe-mixin";
 import ListenerMixin from "@yadah/service-listener";
-import { TransactionMixin } from "@yadah/service-model";
+import { TransactionMixin } from "@yadah/subsystem-knex";
 import { ContextMixin } from "@yadah/subsystem-context";
 import assert from "node:assert";
 

@@ -1,7 +1,18 @@
 {
   "name": "@yadah/data-manager",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.1.1",
+  "description": "Yadah data manager to co-ordinate backend subsystems and services",
+  "keywords": [
+    "yadah"
+  ],
+  "homepage": "https://github.com/ttoohey/yadah/tree/master/packages/data-manager#readme",
+  "bugs": "https://github.com/ttoohey/yadah/issues",
+  "license": "ISC",
+  "author": "ttoohey",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ttoohey/yadah"
+  },
   "type": "module",
   "exports": "./lib/index.js",
   "files": [
@@ -19,11 +30,6 @@
     "test": "ava",
     "transpile": "babel --ignore \"**/*.test.js\" -d lib src --copy-files --no-copy-ignored"
   },
-  "author": "",
-  "license": "UNLICENSED",
-  "engines": {
-    "node": ">=18.3.0"
-  },
   "devDependencies": {
     "@babel/cli": "^7.17.10",
     "@babel/core": "^7.18.2",
@@ -39,5 +45,8 @@
     "nodemon": "^2.0.16",
     "prettier": "^2.6.2",
     "rimraf": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.3.0"
   }
 }

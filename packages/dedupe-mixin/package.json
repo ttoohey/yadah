@@ -1,6 +1,18 @@
 {
   "name": "@yadah/dedupe-mixin",
-  "version": "1.0.0",
+  "version": "0.1.1",
+  "description": "avoid duplicate mixins in class prototype chain",
+  "keywords": [
+    "mixins"
+  ],
+  "homepage": "https://github.com/ttoohey/yadah/tree/master/packages/dedupe-mixin#readme",
+  "bugs": "https://github.com/ttoohey/yadah/issues",
+  "license": "ISC",
+  "author": "ttoohey",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ttoohey/yadah"
+  },
   "type": "module",
   "exports": "./lib/index.js",
   "files": [
@@ -18,11 +30,6 @@
     "test": "ava",
     "transpile": "babel --ignore \"**/*.test.js\" -d lib src --copy-files --no-copy-ignored"
   },
-  "author": "",
-  "license": "UNLICENSED",
-  "engines": {
-    "node": ">=18.3.0"
-  },
   "devDependencies": {
     "@babel/core": "^7.18.6",
     "@babel/eslint-parser": "^7.18.2",
@@ -35,5 +42,8 @@
     "nodemon": "^2.0.18",
     "prettier": "^2.7.1",
     "rimraf": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.3.0"
   }
 }

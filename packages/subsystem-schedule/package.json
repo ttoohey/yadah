@@ -1,7 +1,19 @@
 {
   "name": "@yadah/subsystem-schedule",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.1.1",
+  "description": "Yadah subsystem to manage scheduled tasks",
+  "keywords": [
+    "yadah",
+    "cron"
+  ],
+  "homepage": "https://github.com/ttoohey/yadah/tree/master/packages/subsystem-schedule#readme",
+  "bugs": "https://github.com/ttoohey/yadah/issues",
+  "license": "ISC",
+  "author": "ttoohey",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ttoohey/yadah"
+  },
   "type": "module",
   "exports": "./lib/index.js",
   "files": [
@@ -19,11 +31,6 @@
     "test": "ava",
     "transpile": "babel --ignore \"**/*.test.js\" -d lib src --copy-files --no-copy-ignored"
   },
-  "author": "",
-  "license": "UNLICENSED",
-  "engines": {
-    "node": ">=18.3.0"
-  },
   "devDependencies": {
     "@babel/cli": "^7.17.10",
     "@babel/core": "^7.18.2",
@@ -31,6 +38,7 @@
     "@babel/plugin-proposal-export-default-from": "^7.17.12",
     "@babel/plugin-proposal-pipeline-operator": "^7.18.6",
     "@babel/preset-env": "^7.18.2",
+    "@yadah/depcheck": "0.1.1",
     "ava": "^4.3.0",
     "babel-register-esm": "^1.2.1",
     "eslint": "^8.17.0",
@@ -40,8 +48,11 @@
     "rimraf": "^3.0.2"
   },
   "dependencies": {
-    "@yadah/dedupe-mixin": "*",
+    "@yadah/dedupe-mixin": "0.1.1",
     "cron": "^2.0.0",
     "cron-time-generator": "^1.3.0"
+  },
+  "engines": {
+    "node": ">=18.3.0"
   }
 }

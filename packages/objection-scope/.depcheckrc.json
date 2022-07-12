@@ -1,3 +1,3 @@
 {
-  "ignores": ["babel-register-esm"]
+  "ignores": ["@yadah/depcheck", "babel-register-esm"]
 }

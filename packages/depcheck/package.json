@@ -1,14 +1,23 @@
 {
   "name": "@yadah/depcheck",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.1.1",
+  "description": "check package for missing or unused dependencies using custom babel configuration",
+  "keywords": [
+    "depcheck"
+  ],
+  "homepage": "https://github.com/ttoohey/yadah/tree/master/packages/depcheck#readme",
+  "bugs": "https://github.com/ttoohey/yadah/issues",
+  "license": "ISC",
+  "author": "ttoohey",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ttoohey/yadah"
+  },
   "type": "module",
   "exports": "./depcheck.js",
   "files": [
     "depcheck.js"
   ],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "chalk": "^5.0.1",
     "depcheck": "^1.4.3",

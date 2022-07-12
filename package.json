@@ -1,9 +1,5 @@
 {
-  "name": "yadah",
-  "version": "1.0.0",
-  "description": "",
   "private": true,
-  "author": "",
   "license": "ISC",
   "type": "module",
   "scripts": {
