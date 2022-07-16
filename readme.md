@@ -1,10 +1,42 @@
 # Yadah
 
-Yet another database abstraction helper.
+Yet another data abstraction helper.
 
-Yadah is a kind of framework providing an opinionated foundation for building
-applications. Specifically, it's a _service layer_ wrapping database models
-built using the Objection.js ORM/query builder.
+Yadah is a framework providing an opinionated foundation for building
+services following a domain-driven design.
+
+In this framework, a typical _service_ consists of a number of layers:
+
+- front-ends
+- domains
+- subsystems
+
+```
+            +-------+      +------------+   +-------+
+FRONTENDS   |  API  |      | Background |   |  CLI  |
+            +-------+      +------------+   +-------+
+                |                 |             |
+                |                 |             |
+            +---------------------------------------------------------+
+DOMAINS     |                                                         |
+            +---------------------------------------------------------+
+                |                  |               |              |
+                |                  |               |              |
+            +----------+   +---------------+   +--------+   +---------+
+SUBSYTEMS   | database |   | message queue |   | pubsub |   | storage |
+            +----------+   +---------------+   +--------+   +---------+
+```
+
+A typical _service_ is organised as a mono-repository containing
+a `data` package where subsystems and domains are defined, and separate
+packages for each front-end. A front-end is typically a thin wrapper around
+the _domains_
+
+Domains implement the business logic of the service. A typical pattern is to
+define database models, and construct a domain class around each model.
+
+The types of front-ends and subsystems a service uses is dependant on the
+requirements of that service.
 
 ## Build
 

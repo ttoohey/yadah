@@ -1,12 +1,12 @@
-export DataManager, { Service } from "@yadah/data-manager";
-export CriticalSectionMixin from "@yadah/service-critical-section";
-export ListenerMixin from "@yadah/service-listener";
+export DataManager, { Domain } from "@yadah/data-manager";
+export CriticalSectionMixin from "@yadah/domain-critical-section";
+export ListenerMixin from "@yadah/domain-listener";
 export {
   Model,
   ModelMixin,
   NotUniqueError,
   NotUniqueMixin,
-} from "@yadah/service-model";
+} from "@yadah/domain-model";
 export createContext, { ContextMixin } from "@yadah/subsystem-context";
 export createKnex, {
   KnexMixin,

@@ -1,8 +1,8 @@
-import dedupe from "@yadah/dedupe-mixin";
+import { dedupe, pipe } from "@yadah/mixin";
 import ScopeMixin from "./ScopeMixin.js";
 
 function OrderScopeMixin(superclass) {
-  const mixins = superclass |> ScopeMixin(%);
+  const mixins = pipe(superclass, ScopeMixin);
   return class OrderScope extends mixins {
     static get scopes() {
       const { ref } = this;
@@ -28,4 +28,4 @@ function OrderScopeMixin(superclass) {
   };
 }
 
-export default OrderScopeMixin |> dedupe(%);
+export default dedupe(OrderScopeMixin);

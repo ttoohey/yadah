@@ -1,7 +1,7 @@
 # Yadah
 
-Yadah helps builing applications by organising the "data layer" into "subsystems"
-and "services".
+Yadah helps building services by organising the "data layer" into "subsystems"
+and "domains".
 
 The `@yadah/yadah` package re-exports modules from all the core Yadah packages to
 simplify package installation and usage.
@@ -20,7 +20,7 @@ src/
     index.js
     Bar.js
     Foo.js
-  services/
+  domains/
     index.js
     Bar.js
     Foo.js
@@ -29,7 +29,7 @@ src/
 ```
 
 The `src/index.js` file is responsible for creating subsystem instances and
-initialising the "Yada service classes" via the `DataManager`.
+initialising the "Yada domains classes" via the `DataManager`.
 
 ```js
 // packages/package-name/src/index.js
@@ -45,7 +45,7 @@ import {
 } from "@yadah/yadah";
 import config from "./config.js";
 import * as modelModules from "./models/index.js";
-import * as serviceModules from "./services/index.js";
+import * as domainModules from "./domains/index.js";
 
 // setup subsystems
 export const models = modelModules;
@@ -67,10 +67,10 @@ const dataManager = new DataManager({
   schedule,
 });
 
-// boot services
-export const services = dataManager.boot(serviceModules);
+// boot domains
+export const domains = dataManager.boot(domainModules);
 
-// lifecycle functions allow applications to cleanly control startup and shutdown
+// lifecycle functions allow services to cleanly control startup and shutdown
 export const startup = async () => {
   Model.knex(knex);
   await dataManager.startup();
@@ -81,12 +81,12 @@ export const shutdown = async () => {
 };
 ```
 
-Other packages may then access subsystems and service classes from this package.
+Other packages may then access subsystems and domains classes from this package.
 
 ```js
-import { services, logger } from "@myscope/package-name";
+import { domains, logger } from "@myscope/package-name";
 
-const foo = await services.Foo.find(123);
+const foo = await domains.Foo.find(123);
 logger.info("message", foo);
 ```
 
@@ -96,31 +96,31 @@ https://www.npmjs.com/package/@yadah/data-manager
 
 ### `class DataManager`
 
-Manages subsystems and service classes
+Manages subsystems and domain classes
 
-### `class Service`
+### `class Domain`
 
-Base Yadah service class implemenation
+Base Yadah domain class implemenation
 
-## service-critical-section
+## domain-critical-section
 
-https://www.npmjs.com/package/@yadah/service-critical-section
+https://www.npmjs.com/package/@yadah/domain-critical-section
 
 ### `CriticalSectionMixin`
 
-A mixin for Yadah service classes providing a way to shutdown processes cleanly.
+A mixin for Yadah domain classes providing a way to shutdown processes cleanly.
 
-## service-listener
+## domain-listener
 
-https://www.npmjs.com/package/@yadah/service-listener
+https://www.npmjs.com/package/@yadah/domain-listener
 
 ### `ListenerMixin`
 
-A mixin for Yadah service classes to manage registering event listeners.
+A mixin for Yadah domain classes to manage registering event listeners.
 
-## service-model
+## domain-model
 
-https://www.npmjs.com/package/@yadah/service-model
+https://www.npmjs.com/package/@yadah/domain-model
 
 ### `class Model`
 
@@ -129,7 +129,7 @@ An Objection.js Model with plugins that provide functionality required by the
 
 ### `ModelMixin`
 
-A mixin for Yadah service classes that provides access to an Objection.js Model.
+A mixin for Yadah domain classes that provides access to an Objection.js Model.
 
 ### `class NotUniqueError`
 
@@ -151,7 +151,7 @@ A function to create a "context" subsystem.
 
 ### `ContextMixin`
 
-A mixin for Yadah service classes which provides access to the application's
+A mixin for Yadah domain classes which provides access to the service's
 context subsystem.
 
 ## subsystem-knex
@@ -164,7 +164,7 @@ A function to create a [knex](https://knexjs.org) instance.
 
 ### `KnexMixin`
 
-A mixin for Yadah service classes which provides access to the application's
+A mixin for Yadah domain classes which provides access to the service's
 knex instance.
 
 ### `TRANSACTION`
@@ -173,7 +173,7 @@ A symbol used to lookup the current knex transaction in a promise-chain context.
 
 ### `TransactionMixin`
 
-A mixin for Yadah service classes which allows creating database transactions.
+A mixin for Yadah domain classes which allows creating database transactions.
 
 ## subsystem-logger
 
@@ -185,7 +185,7 @@ A function to create a logger subsystem.
 
 ### `LoggerMixin`
 
-A mixin for Yadah service classes which provides access to the application's
+A mixin for Yadah domain classes which provides access to the service's
 logger subsystem.
 
 ## subsystem-message-queue
@@ -198,8 +198,8 @@ A function to create a message queue (mq) subsystem.
 
 ### `MessageQueueMixin`
 
-A mixin for Yadah service classes which provides access to the message queue
-subsystem, and helper methods for add jobs to the queue.
+A mixin for Yadah domain classes which provides access to the message queue
+subsystem, and helper methods for adding jobs to the queue.
 
 ## subsystem-pubsub
 
@@ -211,7 +211,7 @@ A function to create a PubSub subsystem.
 
 ### `PubSubMixin`
 
-A mixin for Yadah service classes which provides access to the pubsub subsystem,
+A mixin for Yadah domain classes which provides access to the pubsub subsystem,
 and helper methods for publishing messages.
 
 ## subsystem-schedule
@@ -224,4 +224,4 @@ A function to create a schedule subsystem.
 
 ### `ScheduleMixin`
 
-A mixin for Yadah service classes which allows registering scheduled jobs.
+A mixin for Yadah domain classes which allows registering scheduled jobs.

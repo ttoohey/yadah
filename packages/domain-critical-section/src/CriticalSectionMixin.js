@@ -1,9 +1,9 @@
-import dedupe from "@yadah/dedupe-mixin";
+import { dedupe, pipe } from "@yadah/mixin";
 import { LoggerMixin } from "@yadah/subsystem-logger";
 import { types } from "node:util";
 
 function CriticalSectionMixin(superclass) {
-  const mixins = superclass |> LoggerMixin(%);
+  const mixins = pipe(superclass, LoggerMixin);
   return class CriticalSection extends mixins {
     #promises = new Map();
     criticalSection(callback) {
@@ -72,4 +72,4 @@ function CriticalSectionMixin(superclass) {
   };
 }
 
-export default CriticalSectionMixin |> dedupe(%);
+export default dedupe(CriticalSectionMixin);

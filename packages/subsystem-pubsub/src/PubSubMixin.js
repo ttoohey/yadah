@@ -1,12 +1,12 @@
-import dedupe from "@yadah/dedupe-mixin";
-import ListenerMixin from "@yadah/service-listener";
+import { dedupe, pipe } from "@yadah/mixin";
+import ListenerMixin from "@yadah/domain-listener";
 import { ContextMixin } from "@yadah/subsystem-context";
 import camelcase from "camelcase";
 import assert from "node:assert";
 import PubSubAgent from "./PubSub.js";
 
 function PubSubMixin(superclass) {
-  const mixins = superclass |> ContextMixin(%) |> ListenerMixin(%);
+  const mixins = pipe(superclass, ContextMixin, ListenerMixin);
   return class PubSub extends mixins {
     /**
      * PubSub subsystem instance
@@ -54,7 +54,7 @@ function PubSubMixin(superclass) {
       handler.map = (map) => {
         const _map = state.map;
         state.map = (...args) =>
-          _map(...args) |> (Array.isArray(%) ? map(...%) : %);
+          pipe(_map(...args), (x) => (Array.isArray(x) ? map(...x) : x));
         return handler;
       };
       handler.id = (id) => {
@@ -75,4 +75,4 @@ function PubSubMixin(superclass) {
   };
 }
 
-export default PubSubMixin |> dedupe(%);
+export default dedupe(PubSubMixin);

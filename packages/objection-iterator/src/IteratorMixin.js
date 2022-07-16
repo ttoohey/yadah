@@ -1,15 +1,15 @@
-import dedupe from "@yadah/dedupe-mixin";
+import { dedupe } from "@yadah/mixin";
 
 function IteratorMixin(superclass) {
   return class Iterator extends superclass {
     static get QueryBuilder() {
       return class extends super.QueryBuilder {
         async *[Symbol.asyncIterator]() {
-          const modelClass = this.resultModelClass();
+          const Model = this.resultModelClass();
           for await (const data of this.toKnexQuery().stream().iterator()) {
-            const modelInstance = modelClass.fromJson(data);
-            modelInstance.$afterFind(this.context());
-            yield modelInstance;
+            const model = Model.fromJson(data);
+            model.$afterFind(this.context());
+            yield model;
           }
         }
       };
@@ -17,4 +17,4 @@ function IteratorMixin(superclass) {
   };
 }
 
-export default IteratorMixin |> dedupe(%);
+export default dedupe(IteratorMixin);

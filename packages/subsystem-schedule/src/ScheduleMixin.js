@@ -1,4 +1,4 @@
-import dedupe from "@yadah/dedupe-mixin";
+import { dedupe } from "@yadah/mixin";
 import assert from "node:assert";
 
 function ScheduleMixin(superclass) {
@@ -23,4 +23,4 @@ function ScheduleMixin(superclass) {
   };
 }
 
-export default ScheduleMixin |> dedupe(%);
+export default dedupe(ScheduleMixin);

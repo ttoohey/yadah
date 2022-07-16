@@ -1,15 +1,16 @@
 # Yadah Logger subsystem
 
-A [Yadah](https://www.npmjs.com/packages/@yadah/yadah) subsystem and Service class
+A [Yadah](https://www.npmjs.com/package/@yadah/yadah) subsystem and Domain class
 mixin that provides a logging using [winston](https://www.npmjs.com/package/winston).
 
 ## Basic usage
 
 ```js
 import createLogger, { LoggerMixin } from "@yadah/subsystem-logger";
-import DataManager, { Service } from "@yadah/data-manager";
+import DataManager, { Domain } from "@yadah/data-manager";
+import { pipe } from "@yadah/mixin";
 
-class MyService extends (Service |> LoggerMixin(%)) {
+class MyDomain extends pipe(Domain, LoggerMixin) {
   foo() {
     this.logger.info("foo() was called");
   }
@@ -26,12 +27,12 @@ class MyService extends (Service |> LoggerMixin(%)) {
 const logger = createLogger({ pretty: true, silent: false, level: "info" });
 
 const dataManager = new DataManager({ logger });
-const services = dataManager.boot({ MyService });
+const domains = dataManager.boot({ MyDomain });
 
-services.MyService.foo();
+domains.MyDomain.foo();
 // info: foo() was called {timestamp}
 
-services.MyService.err();
+domains.MyDomain.err();
 // error: err() threw {timestamp}
 // Error: error message
 //   {stack}
@@ -51,5 +52,5 @@ Options:
 
 ## LoggerMixin
 
-The `LoggerMixin` function will add a `.logger` property to service classes which
+The `LoggerMixin` function will add a `.logger` property to domain classes which
 provides access to the `logger` instance.

@@ -1,6 +1,6 @@
-export default function dedupeMixin(mixin) {
+export default function dedupe(mixin) {
   const symbol = Symbol(mixin.name);
-  const dedupedMixin = function (superclass) {
+  const deduped = function (superclass) {
     if (symbol in superclass) {
       return superclass;
     }
@@ -8,6 +8,6 @@ export default function dedupeMixin(mixin) {
       static [symbol];
     };
   };
-  dedupedMixin.extends = (superclass) => symbol in superclass;
-  return dedupedMixin;
+  deduped.extends = (superclass) => symbol in superclass;
+  return deduped;
 }

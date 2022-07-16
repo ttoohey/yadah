@@ -1,4 +1,4 @@
-import dedupe from "@yadah/dedupe-mixin";
+import { dedupe } from "@yadah/mixin";
 import assert from "node:assert";
 
 function ContextMixin(superclass) {
@@ -20,4 +20,4 @@ function ContextMixin(superclass) {
   };
 }
 
-export default ContextMixin |> dedupe(%);
+export default dedupe(ContextMixin);

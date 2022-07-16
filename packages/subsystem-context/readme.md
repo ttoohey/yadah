@@ -1,15 +1,16 @@
 # Yadah Context subsystem
 
-A [Yadah](https://www.npmjs.com/packages/@yadah/yadah) subsystem and Service class
+A [Yadah](https://www.npmjs.com/package/@yadah/yadah) subsystem and Domain class
 mixin that provides a way to access shared "context" values in promise chains.
 
 ## Basic usage
 
 ```js
 import createContext, { ContextMixin } from "@yadah/subsystem-context";
-import DataManager, { Service } from "@yadah/data-manager";
+import DataManager, { Domain } from "@yadah/data-manager";
+import { pipe } from "@yadah/mixin";
 
-class MyService extends (Service |> ContextMixin(%)) {
+class MyDomain extends pipe(Domain, ContextMixin) {
   async foo() {
     const value = this.context.get("foo");
     console.log(value);
@@ -26,15 +27,15 @@ class MyService extends (Service |> ContextMixin(%)) {
 const context = createContext();
 
 const dataManager = new DataManager({ context });
-const services = dataManager.boot({ MyService });
+const domains = dataManager.boot({ MyDomain });
 
-await services.MyService.bar();
+await domains.MyDomain.bar();
 // logs: "undefined!"
 
 context(async (ctx) => {
   ctx.set("foo", "demo inside context");
-  await services.MyService.bar();
-  await services.MyService.foo();
+  await domains.MyDomain.bar();
+  await domains.MyDomain.foo();
 });
 // logs:
 // "demo inside context!"

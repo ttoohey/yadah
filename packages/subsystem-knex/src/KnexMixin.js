@@ -1,4 +1,4 @@
-import dedupe from "@yadah/dedupe-mixin";
+import { dedupe } from "@yadah/mixin";
 import assert from "node:assert";
 
 function KnexMixin(superclass) {
@@ -20,4 +20,4 @@ function KnexMixin(superclass) {
   };
 }
 
-export default KnexMixin |> dedupe(%);
+export default dedupe(KnexMixin);

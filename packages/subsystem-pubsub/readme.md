@@ -1,26 +1,27 @@
 # Yadah PubSub subsystem
 
-A [Yadah](https://www.npmjs.com/packages/@yadah/yadah) subsystem and Service class
+A [Yadah](https://www.npmjs.com/package/@yadah/yadah) subsystem and Domain class
 mixin that provides Pub/Sub functionality.
 
 ## Basic usage
 
 ```js
 import createPubSub, { PubSubMixin } from "@yadah/subsystem-pubsub";
-import DataManager, { Service } from "@yadah/data-manager";
-import ListenerMixin from "@yadah/service-listener";
+import DataManager, { Domain } from "@yadah/data-manager";
+import ListenerMixin from "@yadah/domain-listener";
 import createContext from "@yadah/subsystem-context";
 import createKnex from "@yadah/subsystem-knex";
 import createLogger from "@yadah/subsystem-logger";
+import { pipe } from "@yadah/mixin";
 import { once } from "node:events";
 
-class MyService extends (Service |> ListenerMixin(%) |> PubSubMixin(%)) {
+class MyDomain extends pipe(Domain, ListenerMixin, PubSubMixin) {
   registerListeners() {
     // ensure all superclass listeners are registered
     super.registerListeners();
 
-    // This will listen for the "example" event being emitted on the MyService
-    // singleton, and re-publish events on channel "myServiceExample"
+    // This will listen for the "example" event being emitted on the MyDomain
+    // singleton, and re-publish events on channel "myDomainExample"
     this.publish.on("example");
   }
 }
@@ -33,20 +34,21 @@ const knex = createKnex({
 });
 const logger = createLogger({ pretty: true });
 const pubsub = createPubSub(knex);
+await pubsub.migrate();
 
-// create and boot services
+// create and boot domains
 const dataManager = new DataManager({ context, knex, pubsub });
-const services = dataManager.boot({ MyService });
+const domains = dataManager.boot({ MyDomain });
 
-// start services and subscribe to pubsub channel
+// start domains and subscribe to pubsub channel
 await dataManager.startup();
-const subscription = pubsub.subscribe("myServiceExample");
+const subscription = pubsub.subscribe("myDomainExample");
 
 // `subscription` is a Readable stream. The custom event 'pubsub:ready'
 // indicates it is ready to receive messages
 subscription.on("pubsub:ready", () => {
-  // the "example" event is published to the "myServiceExample" channel.
-  services.MyService.emit("example", { data: "example-payload" });
+  // the "example" event is published to the "myDomainExample" channel.
+  domains.MyDomain.emit("example", { data: "example-payload" });
 });
 
 // read the first payload from the subscription
@@ -58,7 +60,7 @@ logger.info("example payload received", ...payload);
 // close the subscription and wait for cleanup
 await pubsub.unsubscribe(subscription);
 
-// shutdown pubsub and services
+// shutdown pubsub and domains
 await pubsub.unlisten();
 await dataManager.shutdown();
 await knex.destroy();
@@ -99,22 +101,24 @@ performed.
 
 Closes all subscriptions.
 
-Returns a `Promise` that resolves when the stream
+Returns a `Promise` that resolves when the connection has closed.
 
 ## PubSubMixin
 
-The `PubSubMixin` function will add a `.pubsub` property to service classes which
+The `PubSubMixin` function will add a `.pubsub` property to domain classes which
 provides access to the pubsub instance, and a `.publish` getter to use
 in the `registerListeners()` function.
 
 An error will be thrown if no `pubsub` subsystem is provided during the `boot`
 lifecycle.
 
-The `.publish` getter is used setup an event handler to publish events to the
+The `.publish` getter is used to setup an event handler to publish events to the
 pubsub subsystem.
 
 ```js
-class MyService extends (Service |> ListenerMixin(%) |> PubSubMixin(%)) {
+import { pipe } from "@yadah/mixin";
+
+class MyDomain extends pipe(Domain, ListenerMixin, PubSubMixin) {
   registerListeners() {
     super.registerListeners();
 
@@ -139,6 +143,7 @@ data to publish as the message payload, or a non-array (typically `null` or
 `undefined`) to filter the event and not publish a message.
 
 ```js
+// *Example*
 // only broadcast messages when the `broadcast` argument is true
 // also, only publish the message in the payload
 this.publish.map((message, broadcast) => (broadcast ? [message] : null));
@@ -149,7 +154,7 @@ this.publish.map((message, broadcast) => (broadcast ? [message] : null));
 The `.id` modifier is used to override the default channel. This allows
 controlling the channel in cases where that is required.
 
-By default, the channel will be the service class constructor name. If the `.on`
+By default, the channel will be the domain class constructor name. If the `.on`
 modifier is used, the channel will have the event name as a suffix.
 
 `.id` accepts a callback with signature `(eventName, id) => channel` allowing

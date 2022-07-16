@@ -1,72 +1,72 @@
-import Service from "./Service.js";
+import Domain from "./Domain.js";
 
-const isServiceInstance = (service) => service instanceof Service;
-const isServiceClass = (ServiceClass) =>
-  Object.isPrototypeOf.call(Service, ServiceClass);
+const isDomainInstance = (domain) => domain instanceof Domain;
+const isDomainClass = (DomainClass) =>
+  Object.isPrototypeOf.call(Domain, DomainClass);
 
 export default class DataManager {
-  #services;
+  #domains;
   #modules;
   #subsystems;
 
-  constructor(subsystems, serviceModules) {
-    const services = {
+  constructor(subsystems, domainModules) {
+    const domains = {
       [Symbol.iterator]: function* () {
-        for (const value of Object.values(services)) {
+        for (const value of Object.values(domains)) {
           yield value;
         }
       },
     };
-    this.#services = services;
-    this.#subsystems = { ...subsystems, services };
-    if (serviceModules) {
-      this.boot(serviceModules);
+    this.#domains = domains;
+    this.#subsystems = { ...subsystems, domains };
+    if (domainModules) {
+      this.boot(domainModules);
     }
   }
   boot(modules) {
-    const services = this.#services;
+    const domains = this.#domains;
     const subsystems = this.#subsystems;
-    Object.entries(modules).forEach(([name, ServiceClass]) => {
+    Object.entries(modules).forEach(([name, DomainClass]) => {
       try {
-        if (isServiceClass(ServiceClass)) {
-          services[name] = new ServiceClass(subsystems);
+        if (isDomainClass(DomainClass)) {
+          domains[name] = new DomainClass(subsystems);
         } else {
-          services[name] = ServiceClass;
+          domains[name] = DomainClass;
         }
       } catch (error) {
-        error.service = ServiceClass;
+        error.domain = DomainClass;
         throw error;
       }
     });
-    Object.values(services)
-      .filter(isServiceInstance)
-      .forEach((service) => {
+    Object.values(domains)
+      .filter(isDomainInstance)
+      .forEach((domain) => {
         try {
-          service.boot();
+          domain.boot();
         } catch (error) {
-          error.service = service;
+          error.domain = domain;
           throw error;
         }
       });
-    return services;
+    return domains;
   }
   startup() {
-    const services = this.#services;
+    const domains = this.#domains;
     return Promise.all(
-      Object.values(services)
-        .filter(isServiceInstance)
-        .map((service) => service.startup())
+      Object.values(domains)
+        .filter(isDomainInstance)
+        .map((domain) => domain.startup())
     );
   }
   shutdown() {
-    const services = this.#services;
+    const domains = this.#domains;
     return Promise.all(
-      Object.values(services)
-        .filter(isServiceInstance)
-        .map((service) => service.shutdown())
+      Object.values(domains)
+        .filter(isDomainInstance)
+        .map((domain) => domain.shutdown())
     );
   }
-  get services() {
-    return this.#services;
+  get domains() {
+    return this.#domains;
   }
 }

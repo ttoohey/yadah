@@ -1,4 +1,4 @@
-import dedupe from "@yadah/dedupe-mixin";
+import { dedupe } from "@yadah/mixin";
 import ScopeBuilderBase from "./ScopeBuilder.js";
 
 function ScopeMixin(superclass) {
@@ -54,4 +54,4 @@ function ScopeMixin(superclass) {
   };
 }
 
-export default ScopeMixin |> dedupe(%);
+export default dedupe(ScopeMixin);

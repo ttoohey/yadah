@@ -19,16 +19,16 @@ concurrently(
       name: "objection-scope",
     },
     {
-      command: "npm start -w @yadah/service-critical-section",
-      name: "service-critical-section",
+      command: "npm start -w @yadah/domain-critical-section",
+      name: "domain-critical-section",
     },
     {
-      command: "npm start -w @yadah/service-listener",
-      name: "service-listener",
+      command: "npm start -w @yadah/domain-listener",
+      name: "domain-listener",
     },
     {
-      command: "npm start -w @yadah/service-model",
-      name: "service-model",
+      command: "npm start -w @yadah/domain-model",
+      name: "domain-model",
     },
     {
       command: "npm start -w @yadah/subsystem-context",

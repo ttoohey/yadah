@@ -1,2 +1,2 @@
-export Service from "./Service.js";
+export Domain from "./Domain.js";
 export default from "./DataManager.js";

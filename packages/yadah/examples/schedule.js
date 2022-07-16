@@ -1,11 +1,12 @@
 import createSchedule, { ScheduleMixin } from "@yadah/subsystem-schedule";
-import DataManager, { Service } from "@yadah/data-manager";
+import DataManager, { Domain } from "@yadah/data-manager";
 import createKnex from "@yadah/subsystem-knex";
 import createLogger, { LoggerMixin } from "@yadah/subsystem-logger";
+import { pipe } from "@yadah/mixin";
 import { once } from "node:events";
 import { setTimeout } from "node:timers/promises";
 
-class MyService extends (Service |> LoggerMixin(%) |> ScheduleMixin(%)) {
+class MyDomain extends pipe(Domain, LoggerMixin, ScheduleMixin) {
   registerSchedule() {
     // ensure all superclass schedules are registered
     super.registerSchedule();
@@ -28,28 +29,28 @@ const knex = createKnex({
 const logger = createLogger({ pretty: true });
 const schedule = createSchedule(knex, logger);
 
-// create and boot services
+// create and boot domains
 const dataManager = new DataManager({ schedule, logger });
-const services = dataManager.boot({ MyService });
+const domains = dataManager.boot({ MyDomain });
 
-// register services with the schedule subsystem
-schedule.register(services);
+// register domains with the schedule subsystem
+schedule.register(domains);
 
-// start services and scheduled tasks
+// start domains and scheduled tasks
 await dataManager.startup();
 await schedule.start();
 
 await Promise.race([
   // wait for the tickTock() function to be fired
-  once(services.MyService, "tickTock"),
+  once(domains.MyDomain, "tickTock"),
   // or, safety-net timeout after 60s
   setTimeout(60000, undefined, { ref: false }),
 ]);
-// info: schedule: Started "MyService.tickTock" {timestamp}
+// info: schedule: Started "MyDomain.tickTock" {timestamp}
 // info: tick tock {timestamp}
-// info: schedule: Finished "MyService.tickTock" {timestamp}
+// info: schedule: Finished "MyDomain.tickTock" {timestamp}
 
-// shutdown schedule and services
+// shutdown schedule and domains
 await schedule.stop();
 await dataManager.shutdown();
 await knex.destroy();

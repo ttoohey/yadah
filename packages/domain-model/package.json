@@ -1,0 +1,63 @@
+{
+  "name": "@yadah/domain-model",
+  "version": "0.1.0",
+  "description": "Yadah domain class mixin to wrap Objection.js models",
+  "keywords": [
+    "yadah",
+    "objection",
+    "model"
+  ],
+  "homepage": "https://github.com/ttoohey/yadah/tree/master/packages/domain-model#readme",
+  "bugs": "https://github.com/ttoohey/yadah/issues",
+  "license": "ISC",
+  "author": "ttoohey",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ttoohey/yadah"
+  },
+  "type": "module",
+  "exports": "./lib/index.js",
+  "files": [
+    "lib/*.js"
+  ],
+  "scripts": {
+    "build": "mkdir -p lib && npm run -- transpile --source-maps=false",
+    "build:dev": "mkdir -p lib && npm run -- transpile --source-maps=both",
+    "clean": "rimraf lib",
+    "depcheck": "node --no-warnings --input-type=module --eval 'import \"@yadah/depcheck\"'",
+    "lint": "eslint src",
+    "prepare": "npm run clean && npm run build",
+    "prettier": "prettier src",
+    "start": "nodemon build:dev",
+    "test": "ava",
+    "transpile": "babel --ignore \"**/*.test.js\" -d lib src --copy-files --no-copy-ignored"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.17.10",
+    "@babel/core": "^7.18.2",
+    "@babel/eslint-parser": "^7.18.2",
+    "@babel/plugin-proposal-export-default-from": "^7.17.12",
+    "@babel/preset-env": "^7.18.2",
+    "@yadah/depcheck": "0.1.1",
+    "ava": "^4.3.0",
+    "babel-register-esm": "^1.2.1",
+    "eslint": "^8.17.0",
+    "eslint-config-prettier": "^8.5.0",
+    "nodemon": "^2.0.16",
+    "prettier": "^2.6.2",
+    "rimraf": "^3.0.2"
+  },
+  "dependencies": {
+    "@yadah/mixin": "0.1.0",
+    "@yadah/objection-iterator": "0.1.1",
+    "@yadah/objection-scope": "0.1.1",
+    "@yadah/subsystem-context": "0.1.1",
+    "@yadah/subsystem-knex": "0.1.1",
+    "csv-stringify": "^6.1.0",
+    "lodash-es": "^4.17.21",
+    "objection": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=18.3.0"
+  }
+}

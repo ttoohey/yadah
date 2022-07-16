@@ -12,9 +12,9 @@ similar way to [`Model.modifiers`](https://vincit.github.io/objection.js/recipes
 
 ```js
 import ScopeMixin from "@yadah/objection-scope"
-import { Model } from "objection"
+import { mixin, Model } from "objection"
 
-class MyModel extends (Model |> ScopeMixin(%)) {
+class MyModel extends mixin(Model, [ScopeMixin]) {
   static get scopes() {
     return {
       ...super.scopes,
@@ -27,7 +27,7 @@ class MyModel extends (Model |> ScopeMixin(%)) {
 
 MyModel.query().scope({ keyword: "abc" })
 // select * from "tableName" where "tableName"."title" like ?
-// bindings: ["abc"]
+// bindings: ["%abc"]
 ```
 
 ## Matcher
@@ -35,7 +35,7 @@ MyModel.query().scope({ keyword: "abc" })
 The ScopeBuilder class can be used to help write common modifier patterns.
 
 ```js
-class MyModel extends (Model |> ScopeMixin(%)) {
+class MyModel extends mixin(Model, [ScopeMixin]) {
   static get scopes() {
     const matcher = new this.ScopeBuilder();
     return {

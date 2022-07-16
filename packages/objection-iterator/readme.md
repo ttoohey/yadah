@@ -6,10 +6,10 @@ It allows _streaming query results_!
 ## Usage
 
 ```js
-import { Model } from "objection";
+import { mixin, Model } from "objection";
 import IteratorMixin from "@yadah/objection-iterator";
 
-class MyModel extends (Model |> IteratorMixin(%)) {
+class MyModel extends mixin(Model, [IteratorMixin]) {
   static tableName = "mytable";
 
   async doSomething() {

@@ -1,13 +1,17 @@
-import { Service } from "@yadah/data-manager";
-import dedupe from "@yadah/dedupe-mixin";
-import ListenerMixin from "@yadah/service-listener";
+import { Domain } from "@yadah/data-manager";
+import { dedupe, pipe } from "@yadah/mixin";
+import ListenerMixin from "@yadah/domain-listener";
 import { TransactionMixin } from "@yadah/subsystem-knex";
 import { ContextMixin } from "@yadah/subsystem-context";
 import assert from "node:assert";
 
 function MessageQueueMixin(superclass) {
-  const mixins =
-    superclass |> ContextMixin(%) |> ListenerMixin(%) |> TransactionMixin(%);
+  const mixins = pipe(
+    superclass,
+    ContextMixin,
+    ListenerMixin,
+    TransactionMixin
+  );
   return class MessageQueue extends mixins {
     /**
      * MessageQueue subsystem instance
@@ -46,15 +50,15 @@ function MessageQueueMixin(superclass) {
             this.mq.send(taskId, payload, this.transactionOrKnex)
           );
         };
-        state.onList.forEach(([service, eventName]) =>
-          service.on(eventName, eventHandler)
+        state.onList.forEach(([domain, eventName]) =>
+          domain.on(eventName, eventHandler)
         );
         return eventHandler;
       };
       queue.map = (map) => {
         const _map = state.map;
         state.map = (...args) =>
-          _map(...args) |> (Array.isArray(%) ? map(...%) : %);
+          pipe(_map(...args), (x) => (Array.isArray(x) ? map(...x) : x));
         return queue;
       };
       queue.id = (id) => {
@@ -62,12 +66,12 @@ function MessageQueueMixin(superclass) {
         return queue;
       };
       queue.on = (...args) => {
-        const isService = args[0] instanceof Service;
-        const service = isService ? args[0] : this;
-        const eventNames = isService ? args.slice(1) : args;
+        const isDomain = args[0] instanceof Domain;
+        const domain = isDomain ? args[0] : this;
+        const eventNames = isDomain ? args.slice(1) : args;
         state.onList = [
           ...state.onList,
-          ...eventNames.map((eventName) => [service, eventName]),
+          ...eventNames.map((eventName) => [domain, eventName]),
         ];
         return queue;
       };
@@ -77,4 +81,4 @@ function MessageQueueMixin(superclass) {
   };
 }
 
-export default MessageQueueMixin |> dedupe(%);
+export default dedupe(MessageQueueMixin);

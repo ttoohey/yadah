@@ -1,4 +1,4 @@
-import dedupe from "@yadah/dedupe-mixin";
+import { dedupe } from "@yadah/mixin";
 import NotUniqueError from "./NotUniqueError.js";
 
 function NotUniqueMixin(superclass) {
@@ -18,4 +18,4 @@ function NotUniqueMixin(superclass) {
   };
 }
 
-export default NotUniqueMixin |> dedupe(%);
+export default dedupe(NotUniqueMixin);

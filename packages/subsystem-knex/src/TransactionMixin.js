@@ -1,11 +1,11 @@
-import dedupe from "@yadah/dedupe-mixin";
+import { dedupe, pipe } from "@yadah/mixin";
 import { ContextMixin } from "@yadah/subsystem-context";
 import KnexMixin from "./KnexMixin.js";
 
 export const TRANSACTION = Symbol("TRANSACTION");
 
 function TransactionMixin(superclass) {
-  const mixins = superclass |> KnexMixin(%) |> ContextMixin(%);
+  const mixins = pipe(superclass, KnexMixin, ContextMixin);
   return class Transaction extends mixins {
     get transaction() {
       return async (callback) => {
@@ -35,4 +35,4 @@ function TransactionMixin(superclass) {
   };
 }
 
-export default TransactionMixin |> dedupe(%);
+export default dedupe(TransactionMixin);

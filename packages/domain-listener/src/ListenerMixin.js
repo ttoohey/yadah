@@ -1,4 +1,4 @@
-import dedupe from "@yadah/dedupe-mixin";
+import { dedupe } from "@yadah/mixin";
 
 function ListenerMixin(superclass) {
   return class Listener extends superclass {
@@ -21,4 +21,4 @@ function ListenerMixin(superclass) {
   };
 }
 
-export default ListenerMixin |> dedupe(%);
+export default dedupe(ListenerMixin);

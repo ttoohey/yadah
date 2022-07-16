@@ -1,4 +1,4 @@
-import dedupe from "@yadah/dedupe-mixin";
+import { dedupe } from "@yadah/mixin";
 import assert from "node:assert";
 
 function LoggerMixin(superclass) {
@@ -20,4 +20,4 @@ function LoggerMixin(superclass) {
   };
 }
 
-export default LoggerMixin |> dedupe(%);
+export default dedupe(LoggerMixin);

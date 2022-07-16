@@ -1,7 +1,7 @@
 import EventEmitter from "node:events";
 
-export default class Service extends EventEmitter {
-  static services = {};
+export default class Domain extends EventEmitter {
+  static domains = {};
   constructor(subsystems) {
     super();
     Object.assign(this, subsystems);

@@ -1,6 +1,6 @@
 import test from "ava";
 import DataManager from "./DataManager.js";
-import Service from "./Service.js";
+import Domain from "./Domain.js";
 
 test("module exports a function", (t) => {
   t.truthy(
@@ -9,10 +9,10 @@ test("module exports a function", (t) => {
   );
 });
 
-test("subsystems are properties of Service class instances", (t) => {
+test("subsystems are properties of Domain class instances", (t) => {
   const subsystems = { example: {} };
-  const modules = { A: class A extends Service {} };
+  const modules = { A: class A extends Domain {} };
   const data = new DataManager(subsystems);
-  const services = data.boot(modules);
-  t.is(services.A.example, subsystems.example);
+  const domains = data.boot(modules);
+  t.is(domains.A.example, subsystems.example);
 });

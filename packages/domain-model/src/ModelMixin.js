@@ -1,4 +1,4 @@
-import dedupe from "@yadah/dedupe-mixin";
+import { dedupe, pipe } from "@yadah/mixin";
 import IteratorMixin from "@yadah/objection-iterator";
 import { ScopeMixin } from "@yadah/objection-scope";
 import { ContextMixin } from "@yadah/subsystem-context";
@@ -35,13 +35,12 @@ function ModelMixin(superclass, Model) {
   }
   if (!NotUniqueMixin.extends(Model)) {
     assert.fail(
-      `"class ${Model.name}" must inherit NotUniqueMixin mixin from "@yadah/service-model"`
+      `"class ${Model.name}" must inherit NotUniqueMixin mixin from "@yadah/domain-model"`
     );
   }
 
-  const mixins =
-    superclass |> KnexMixin(%) |> ContextMixin(%) |> TransactionMixin(%);
-  return class ServiceModel extends mixins {
+  const mixins = pipe(superclass, KnexMixin, ContextMixin, TransactionMixin);
+  return class DomainModel extends mixins {
     constructor() {
       super(...arguments);
       Model.knex(this.knex);
@@ -119,8 +118,7 @@ function ModelMixin(superclass, Model) {
     }
 
     async create(json, onCreate) {
-      return this.transaction(async () => {
-        const trx = this.transactionOrKnex;
+      return this.transaction(async (trx) => {
         const queryContext = this.context.get("queryContext");
         const model = await (async () => {
           const result = await Model.query(trx)
@@ -172,8 +170,7 @@ function ModelMixin(superclass, Model) {
     }
 
     async update(id, json, onUpdate) {
-      return this.transaction(async () => {
-        const trx = this.transactionOrKnex;
+      return this.transaction(async (trx) => {
         const queryContext = this.context.get("queryContext");
         const [model, oldModel] = await (async () => {
           const oldModel = await this.find(id);
@@ -203,8 +200,7 @@ function ModelMixin(superclass, Model) {
     }
 
     async delete(id, onDelete) {
-      return this.transaction(async () => {
-        const trx = this.transactionOrKnex;
+      return this.transaction(async (trx) => {
         const queryContext = this.context.get("queryContext");
         const model = await (async () => {
           const model = await this.find(id);
@@ -234,4 +230,4 @@ function ModelMixin(superclass, Model) {
   };
 }
 
-export default ModelMixin |> dedupe(%);
+export default dedupe(ModelMixin);

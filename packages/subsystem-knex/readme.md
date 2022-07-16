@@ -1,15 +1,16 @@
 # Yadah Knex subsystem
 
-A [Yadah](https://www.npmjs.com/packages/@yadah/yadah) subsystem and Service class
+A [Yadah](https://www.npmjs.com/package/@yadah/yadah) subsystem and Domain class
 mixin that provides a way to access a [knex](https://knexjs.org/) instance.
 
 ## Basic usage
 
 ```js
 import createKnex, { KnexMixin } from "@yadah/subsystem-knex";
-import DataManager, { Service } from "@yadah/data-manager";
+import DataManager, { Domain } from "@yadah/data-manager";
+import { pipe } from "@yadah/mixin";
 
-class MyService extends (Service |> KnexMixin(%)) {
+class MyDomain extends pipe(Domain, KnexMixin) {
   async foo() {
     return await this.knex.select("*").table("tableName");
   }
@@ -18,9 +19,9 @@ class MyService extends (Service |> KnexMixin(%)) {
 const knex = createKnex({ ...knexConfigOptions });
 
 const dataManager = new DataManager({ knex });
-const services = dataManager.boot({ MyService });
+const domains = dataManager.boot({ MyDomain });
 
-console.log(await services.MyService.foo());
+console.log(await domains.MyDomain.foo());
 // [...records] from "tableName"
 ```
 
@@ -34,7 +35,7 @@ output as javascript number types (ints, bigints, and floats).
 
 ## KnexMixin
 
-The `KnexMixin` function will add a `.knex` property to service classes which
+The `KnexMixin` function will add a `.knex` property to domain classes which
 provides access to the `knex` instance.
 
 An error will be thrown if no `knex` subsystem is provided during the `boot`
@@ -42,7 +43,7 @@ lifecycle.
 
 ## TransactionMixin
 
-The `TransactionMixin` function will add properties to service classes to run
+The `TransactionMixin` function will add properties to domain classes to run
 database transactions.
 
 ### `transaction(callback)`

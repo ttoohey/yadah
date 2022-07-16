@@ -1,7 +1,7 @@
 {
   "name": "@yadah/subsystem-context",
   "version": "0.1.1",
-  "description": "Yadah service class mixin to provide a shared context to promise chains",
+  "description": "Yadah domain class mixin to provide a shared context to promise chains",
   "keywords": [
     "yadah"
   ],
@@ -34,7 +34,6 @@
     "@babel/core": "^7.18.6",
     "@babel/eslint-parser": "^7.18.2",
     "@babel/plugin-proposal-export-default-from": "^7.18.6",
-    "@babel/plugin-proposal-pipeline-operator": "^7.18.6",
     "@babel/preset-env": "^7.18.6",
     "@yadah/depcheck": "0.1.1",
     "ava": "^4.3.0",
@@ -46,7 +45,7 @@
     "rimraf": "^3.0.2"
   },
   "dependencies": {
-    "@yadah/dedupe-mixin": "0.1.1"
+    "@yadah/mixin": "0.1.0"
   },
   "engines": {
     "node": ">=18.3.0"
