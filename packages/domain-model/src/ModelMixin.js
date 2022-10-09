@@ -1,4 +1,5 @@
 import { dedupe, pipe } from "@yadah/mixin";
+import CopyMixin from "@yadah/objection-copy";
 import IteratorMixin from "@yadah/objection-iterator";
 import { ScopeMixin } from "@yadah/objection-scope";
 import { ContextMixin } from "@yadah/subsystem-context";
@@ -7,30 +8,23 @@ import { stringify } from "csv-stringify";
 import { isEqual } from "lodash-es";
 import assert from "node:assert";
 import { once } from "node:events";
-import { Readable } from "node:stream";
+import { pipeline, Readable } from "node:stream";
 import NotUniqueMixin from "./NotUniqueMixin.js";
 
-async function* makeIterable(data) {
-  if (data instanceof Function) {
-    data = data();
-  }
-  if (data instanceof Readable) {
-    return data.iterator();
-  }
-  for await (const item of data) {
-    yield item;
-  }
-}
-
 function ModelMixin(superclass, Model) {
-  if (!ScopeMixin.extends(Model)) {
+  if (!CopyMixin.extends(Model)) {
     assert.fail(
-      `"class ${Model.name}" must inherit Scope mixin from "@yadah/objection-scope"`
+      `"class ${Model.name}" must inherit Copy mixin from "@yadah/objection-copy"`
     );
   }
   if (!IteratorMixin.extends(Model)) {
     assert.fail(
       `"class ${Model.name}" must inherit Iterator mixin from "@yadah/objection-iterator"`
+    );
+  }
+  if (!ScopeMixin.extends(Model)) {
+    assert.fail(
+      `"class ${Model.name}" must inherit Scope mixin from "@yadah/objection-scope"`
     );
   }
   if (!NotUniqueMixin.extends(Model)) {
@@ -124,7 +118,7 @@ function ModelMixin(superclass, Model) {
           const result = await Model.query(trx)
             .context(queryContext)
             .insert(json)
-            .returning("id");
+            .returning(Model.idColumn);
           const model = await this.find(result.$id());
           if (onCreate instanceof Function) {
             return (await onCreate(model, trx)) || model;
@@ -137,36 +131,24 @@ function ModelMixin(superclass, Model) {
     }
 
     async copyFrom(data) {
-      data = makeIterable(data);
-      const firstRecord = await data[Symbol.asyncIterator]().next();
-      if (firstRecord.done) {
+      const readable = Readable.from(data instanceof Function ? data() : data);
+      await once(readable, "readable");
+      const firstRecord = readable.read();
+      if (firstRecord === null) {
         return 0;
       }
-      const columns = Object.keys(firstRecord.value);
-      const stream = stringify({
+      readable.unshift(firstRecord);
+      const columns = Object.keys(firstRecord);
+      const stringified = stringify({
         columns,
         quoted_string: true,
         cast: {
           date: (value) => value.toISOString(),
         },
       });
-      (async () => {
-        try {
-          if (!stream.write(firstRecord.value)) {
-            await once(stream, "drain");
-          }
-          for await (const record of data) {
-            if (!stream.write(record)) {
-              await once(stream, "drain");
-            }
-          }
-          stream.end();
-        } catch (e) {
-          stream.destroy(e);
-        }
-      })();
+      pipeline(readable, stringified, () => {});
       const trx = this.transactionOrKnex;
-      return Model.copyFromCsv(stream, columns, trx);
+      return Model.copyFromCsv(stringified, columns, trx);
     }
 
     async update(id, json, onUpdate) {

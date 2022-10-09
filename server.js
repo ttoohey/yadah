@@ -11,6 +11,10 @@ concurrently(
       name: "dedupe-mixin",
     },
     {
+      command: "npm start -w @yadah/objection-copy",
+      name: "objection-copy",
+    },
+    {
       command: "npm start -w @yadah/objection-iterator",
       name: "objection-iterator",
     },

@@ -107,6 +107,19 @@ Returns a `QueryBuilder` instance that resolves with the record matching the sco
 await MyService.one({ field: "bar" }); // returns a MyModel instance
 ```
 
+### many(items, callback)
+
+Creates a union query. A typical use case is to combine the results of multiple
+criteria searches into a single consistent list.
+
+Returns a `QueryBuilder` instance that resolves with an array of records.
+
+```js
+await MyService.many([{ field: "bar" }, { field: "baz" }], (query, criteria) =>
+  query.scope(criteria)
+); // returns array of MyModel instances
+```
+
 ### count(criteria)
 
 Accepts a `.scope()` criteria object.
