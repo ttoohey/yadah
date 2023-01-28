@@ -1,0 +1,8 @@
+{
+  "ignores": [
+    "@yadah/depcheck",
+    "babel-register-esm",
+    "rimraf",
+    "pg-query-stream"
+  ]
+}

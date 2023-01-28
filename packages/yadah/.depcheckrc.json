@@ -1,4 +1,0 @@
-{
-  "ignores": ["@yadah/depcheck", "babel-register-esm"],
-  "ignorePatterns": ["**/examples/*.js"]
-}

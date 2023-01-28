@@ -11,13 +11,14 @@ function importJson(filename) {
 
 const cwd = process.cwd();
 const { name: packageName } = await importJson("package.json");
-const rc = await importJson(".depcheckrc.json");
+const rc = await importJson(process.env.DEPCHECK_CONFIG || ".depcheckrc.json");
 
 const options = {
   ignores: [],
   ...rc,
   parsers: {
     ...rc.parsers,
+    "**/*.ts": depcheck.parser.typescript,
     "**/*.js": parserBabel,
   },
 };
