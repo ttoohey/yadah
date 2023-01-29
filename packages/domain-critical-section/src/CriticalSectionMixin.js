@@ -13,8 +13,10 @@ function CriticalSectionMixin(superclass) {
         (resolve, reject) => (deferred = { resolve, reject })
       )
         .catch((error) => {
-          this.logger.warn(`${process.pid}: critical section was rejected`);
-          this.logger.error(undefined, error);
+          this.logger.npm.error(
+            `${process.pid}: critical section was rejected`,
+            error
+          );
         })
         .finally(() => {
           this.#promises.delete(key);
@@ -55,16 +57,17 @@ function CriticalSectionMixin(superclass) {
     }
 
     async shutdown() {
+      const logger = this.logger.npm;
       const promises = Array.from(this.#promises.values());
       if (promises.length > 0) {
         try {
-          this.logger.debug(
-            `${process.pid}: waiting for critical section to complete (${this.constructor.name})`
+          logger.debug(
+            `${process.pid}: waiting for critical sections to complete (${this.constructor.name})`
           );
           await Promise.all(promises);
-          this.logger.debug(`${process.pid}: critical section completed`);
+          logger.debug(`${process.pid}: critical sections completed`);
         } catch (error) {
-          this.logger.error(`${process.pid}: critical section rejected`, error);
+          logger.error(`${process.pid}: critical sections rejected`, error);
         }
       }
       return super.shutdown();

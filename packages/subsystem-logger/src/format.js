@@ -12,11 +12,15 @@ export function pretty(...args) {
       const timestamp = chalk.dim(new Date().toISOString());
       info[MESSAGE] = `${info.level}: ${info.message}`;
       const splats = info[SPLAT] || [];
-      const splatMessages = splats
-        .filter((s) => s !== null && typeof s === "object" && s.message)
-        .map((s) => s.message);
-      const len = splatMessages.reduce((len, msg) => len + msg.length + 1, 0);
-      info[MESSAGE] = info[MESSAGE].slice(0, info[MESSAGE].length - len);
+      if (
+        splats[0]?.message !== undefined &&
+        info[MESSAGE].endsWith(splats[0].message)
+      ) {
+        info[MESSAGE] = info[MESSAGE].slice(
+          0,
+          info[MESSAGE].length - String(splats[0].message).length - 1
+        );
+      }
       info[MESSAGE] += " " + timestamp;
       for (const splat of splats) {
         info[MESSAGE] +=
@@ -29,12 +33,18 @@ export function pretty(...args) {
 
 export function json(...args) {
   return winston.format((info) => {
+    info[MESSAGE] = info.message;
     const splats = info[SPLAT] || [];
-    const splatMessages = splats
-      .filter((s) => s !== null && typeof s === "object" && s.message)
-      .map((s) => s.message);
-    const len = splatMessages.reduce((len, msg) => len + msg.length + 1, 0);
-    const message = info.message.slice(0, info.message.length - len);
+    if (
+      splats[0]?.message !== undefined &&
+      info[MESSAGE].endsWith(splats[0].message)
+    ) {
+      info[MESSAGE] = info[MESSAGE].slice(
+        0,
+        info[MESSAGE].length - String(splats[0].message).length - 1
+      );
+    }
+    const message = info[MESSAGE];
     info[MESSAGE] = stringify({
       timestamp: new Date().toISOString(),
       level: info.level,
