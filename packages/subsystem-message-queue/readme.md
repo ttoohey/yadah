@@ -1,16 +1,13 @@
 # Yadah Message Queue subsystem
 
 A [Yadah](https://www.npmjs.com/package/@yadah/yadah) subsystem and Domain class
-mixin that provides a message queue using [graphile-worker](https://www.npmjs.com/package/graphile-worker).
-
-This is used in environments where a long-running background service is running
-which waits for tasks to be created and will process them. It allows front-ends
-such as HTTP/API servers to quickly process requests and send the complex jobs
-to a background server.
+mixin that provides a message/job queue using
+[graphile-worker](https://www.npmjs.com/package/graphile-worker).
 
 ## Basic usage
 
 ```js
+// MyDomain.js
 import createMessageQueue, {
   MessageQueueMixin,
 } from "@yadah/subsystem-message-queue";
@@ -39,6 +36,12 @@ class MyDomain extends mixins {
     this.logger.info("example event handled", ...payload);
   }
 }
+
+export default MyDomain;
+```
+
+```js
+import MyDomain from "./MyDomain.js";
 
 // create subsystems
 const context = createContext();
@@ -83,8 +86,8 @@ in the `registerListeners()` function.
 An error will be thrown if no `mq` subsystem is provided during the `boot`
 lifecycle.
 
-The `.queue` getter is used setup an event handler to create and handle message
-queue tasks.
+The `.queue` getter is used to setup an event handler to create and handle
+message queue tasks.
 
 ```js
 class MyDomain extends mixins {
@@ -103,6 +106,33 @@ class MyDomain extends mixins {
 The `.queue` getter returns an object that allows defining how to handle an
 event in a fluent manner. The modifiers are:
 
+### .queue.do(callback) or .queue.do()
+
+_Note: the `.do()` method is not a modifier like other methods. It must be the final method in a fluent chain_
+
+Returns an event handler suitable for attaching to an `EventEmitter` via
+`EventEmitter.on()`.
+
+If the `.on` modifier was used, the handler will be attached to the domain class
+and the return value can be ignored.
+
+The following are equivalent:
+
+```js
+this.on("example", this.queue.do(this.handleExample));
+this.queue.on("example").do(this.handleExample);
+```
+
+If no callback is provided `.do()` will remove any job in the queue
+with a key matching a key set using the `.key()` modifier.
+
+```js
+this.queue
+  .on("delete")
+  .key((data) => `data:${data.id}`)
+  .do(); // remove job
+```
+
 ### .queue.on([Domain,] eventName, ...)
 
 The `.on` modifier is used to list event names that tasks will be created for.
@@ -117,13 +147,16 @@ a callback function to `.map`. The callback should return an array containing
 data to send as the message payload, or a non-array (typically `null` or
 `undefined`) to filter the event and not send a message.
 
+The callback may return a promise.
+
 ```js
-// *Example*
-// only broadcast messages when the `broadcast` argument is true
+// # Example
+// only send messages when the `public` argument is true
 // also, only send the message in the payload
 this.queue
-  .map((message, broadcast) => (broadcast ? [message] : null))
-  .do(this.handleBroadcast);
+  .on(eventName)
+  .map((message, public) => (public ? [message] : null))
+  .do(this.handleExample);
 ```
 
 ### .queue.id(string) or .queue.id((id) => string)
@@ -144,17 +177,82 @@ a new value. This can be useful when using the same code for multiple events, li
 });
 ```
 
-### .queue.do(handler) or .queue(handler)
+### .queue.to(string) or .queue.to((...args) => string)
 
-The `.do` modifier is an alias for calling `.queue()`. It will return an event
-handler suitable for attaching to an `EventEmitter` via `EventEmitter.on()`.
-If the `.on` modifier was used, the handler will be attached to the domain class
-and the return value can be ignored.
+Sets the queue jobs will be sent to. Jobs sent to a named queue will be
+executed in serial.
 
-The following are all equivalent:
+`.to` accepts a callback which accepts the event arguments. The callback must
+return the name of the queue for the event to be sent to.
+
+The callback may return a promise.
+
+### .queue.at(date) or .queue.at((...args) => date)
+
+Sets the time at which the job will be run.
+
+The value should be something that is acceptable to `new Date()` (eg. a string,
+number, or `Date` instance). It may also be a `Knex.raw` instance which
+represents a database `timestamptz` value.
+
+`.at` accepts a callback which accepts the event arguments. The callback must
+return a value representing the time the job will be run.
+
+The callback may return a promise.
 
 ```js
-this.queue.on("example").do(this.handleExample);
-this.on("example", this.queue.do(this.handleExample));
-this.on("example", this.queue(this.handleExample));
+this.queue.at(() => new Date() + 3600 * 1000).do(this.handleExample);
+this.queue.at(knex.raw(`now() + '1 hour'`)).do(this.handleExample);
+this.queue.at((data) => data.timestampField).do(this.handleExample);
 ```
+
+### .queue.key(string) or .queue.key((...args) => string)
+
+Sets the job key which allows replacing or deleting a job that is in the
+queue.
+
+`.key` accepts a callback which accepts the event arguments. The callback must
+return the key.
+
+The callback may return a promise.
+
+```js
+this.queue
+  .key((data) => `my-custom-key:${data.type}:${data.id}`)
+  .do(this.handleExample);
+```
+
+Using a key is useful when combined with `.at()` to create a deferred job which
+may be updated.
+
+### .queue.onJob(callback)
+
+Register a callback to run when a job is created. This provides access to the
+data related to the job.
+
+```js
+this.queue
+  .on(eventName)
+  .onJob((job) => console.log(`Job #${job.id} created`))
+  .do(this.handleExample);
+```
+
+The callback is executed in the context of the event emitter.
+
+The callback may return a promise.
+
+### .queue.onRun(callback)
+
+Register a callback to run when a job is about to run. The provides access to
+the data related to the job.
+
+```js
+this.queue
+  .on(eventName)
+  .onRun((job) => console.log(`Job #${job.id} starting`))
+  .do(this.handleExample);
+```
+
+The callback is executed in the context of the job handler.
+
+The callback may return a promise.

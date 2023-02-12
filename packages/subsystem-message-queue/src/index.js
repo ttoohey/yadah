@@ -1,2 +1,2 @@
-export default from "./mq.js";
+export default from "./createMessageQueue.js";
 export MessageQueueMixin from "./MessageQueueMixin.js";
