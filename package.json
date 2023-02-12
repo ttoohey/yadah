@@ -58,6 +58,7 @@
     "packages/subsystem-message-queue",
     "packages/subsystem-pubsub",
     "packages/subsystem-schedule",
+    "packages/subsystem-storage",
     "packages/yadah"
   ],
   "devDependencies": {

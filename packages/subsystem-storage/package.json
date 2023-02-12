@@ -1,0 +1,54 @@
+{
+  "name": "@yadah/subsystem-storage",
+  "version": "0.1.0",
+  "description": "Yadah subsystem to manage file storage",
+  "keywords": [
+    "yadah",
+    "cron"
+  ],
+  "homepage": "https://github.com/ttoohey/yadah/tree/master/packages/subsystem-storage#readme",
+  "bugs": "https://github.com/ttoohey/yadah/issues",
+  "license": "ISC",
+  "author": "ttoohey",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ttoohey/yadah"
+  },
+  "type": "module",
+  "exports": "./lib/index.js",
+  "files": [
+    "lib/*.js"
+  ],
+  "scripts": {
+    "build": "mkdir -p lib && npm run -- transpile --source-maps=false",
+    "build:dev": "mkdir -p lib && npm run -- transpile --source-maps=both",
+    "clean": "rimraf lib",
+    "depcheck": "DEPCHECK_CONFIG=config/.depcheckrc.json node --no-warnings --input-type=module --eval 'import \"@yadah/depcheck\"'",
+    "lint": "eslint src",
+    "prepare": "npm run clean && npm run build",
+    "prettier": "prettier src",
+    "start": "nodemon --config config/nodemon.json build:dev",
+    "test": "ava --config config/ava.config.js",
+    "transpile": "babel --ignore \"**/*.test.js\" -d lib src --copy-files --no-copy-ignored"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.20.7",
+    "@babel/core": "^7.20.12",
+    "@babel/eslint-parser": "^7.19.1",
+    "@babel/plugin-proposal-export-default-from": "^7.18.10",
+    "@babel/preset-env": "^7.20.2",
+    "ava": "^5.1.1",
+    "babel-register-esm": "^1.2.4",
+    "eslint": "^8.33.0",
+    "eslint-config-prettier": "^8.6.0",
+    "nodemon": "^2.0.20",
+    "prettier": "^2.8.3",
+    "rimraf": "^4.1.2"
+  },
+  "engines": {
+    "node": ">=18.3.0"
+  },
+  "dependencies": {
+    "minimatch": "^6.1.6"
+  }
+}

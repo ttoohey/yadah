@@ -59,6 +59,10 @@ concurrently(
       name: "subsystem-schedule",
     },
     {
+      command: "npm start -w @yadah/subsystem-storage",
+      name: "subsystem-storage",
+    },
+    {
       command: "npm start -w @yadah/yadah",
       name: "yadah",
       prefixColor: "greenBright",
