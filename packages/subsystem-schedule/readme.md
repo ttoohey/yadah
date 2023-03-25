@@ -75,9 +75,10 @@ to set up their scheduled jobs.
 
 This must be called prior to calling `Schedule.start()`.
 
-### Schedule.start()
+### Schedule.start(...scheduleName)
 
-Sets Cron jobs to run.
+Sets Cron jobs to run. Supply no arguments to start all schedules, otherwise
+only schedules defined using `.to(scheduleName)` will be started.
 
 Returns a Promise that resolves when the jobs have been created and started.
 
@@ -94,6 +95,27 @@ storing schedule runtime data. This function should be called prior to starting
 the schedule.
 
 Returns a Promise that resolves when the schema update is complete.
+
+### Schedule.list()
+
+Read current stats of all scheduled jobs.
+
+Returns a then-able and async-iterable object.
+
+```js
+// get array of scheduled job stats
+const stats = await schedule.list();
+// or may be streamed
+for await (const stat of schedule.list()) {
+  ...
+}
+```
+
+### Schedule.find(id)
+
+Read current stats of a specific scheduled job.
+
+Returns a promise that resolves to a job 'stat' object.
 
 ## ScheduleMixin
 
@@ -170,3 +192,10 @@ Note: `.onInit` is a getter:
 ```js
 schedule.onInit.everyHour().do(importantJob);
 ```
+
+### .schedule.to(scheduleName)
+
+Allows grouping jobs to be executed by a specific execution agent.
+
+The `Schedule.start(scheduleName)` method will start only those job with a
+matching name.

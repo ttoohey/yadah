@@ -12,6 +12,8 @@ class Scheduler extends EventEmitter {
   #thisArg;
   #id;
   #proxy;
+  #name;
+  #abortControllers = new Map();
 
   constructor() {
     super(...arguments);
@@ -51,16 +53,12 @@ class Scheduler extends EventEmitter {
     return proxy;
   }
 
-  then(resolve, reject) {
+  boot() {
     try {
       const self = this;
       const callback = this.#callback;
-      const id =
-        this.#id instanceof Function
-          ? this.#id(callback?.name, self.#thisArg?.constructor.name)
-          : this.#id ||
-            (self.#thisArg ? self.#thisArg.constructor.name + "." : "") +
-              (callback?.name || "[Anonymous]");
+      const id = this.#getId();
+      const controllers = this.#abortControllers;
       const job = new CronJob({
         start: false,
         cronTime: this.#cronTime,
@@ -68,18 +66,25 @@ class Scheduler extends EventEmitter {
         timeZone: this.#timeZone,
         onTick: async function () {
           try {
+            const ac = new AbortController();
+            controllers.set(id, ac);
             self.emit("active", id, this);
-            const code = await callback.bind(self.#thisArg)(this);
-            self.emit("idle", id, code, job);
+            const code = await callback.call(self.#thisArg, {
+              signal: ac.signal,
+              job: this,
+            });
+            self.emit("idle", id, code, this);
           } catch (error) {
             self.emit("error", error, id, this);
+          } finally {
+            controllers.delete(id);
           }
         },
       });
       this.#cronJob = [id, job];
-      return resolve(this.#cronJob);
-    } catch (err) {
-      reject(err);
+      return this.#cronJob;
+    } catch (cause) {
+      throw new Error("Unable to initialise CronJob", { cause });
     }
   }
 
@@ -96,6 +101,10 @@ class Scheduler extends EventEmitter {
   stop() {
     const [id, job] = this.#cronJob;
     job.stop();
+    const ac = this.#abortControllers.get(id);
+    if (ac) {
+      ac.abort();
+    }
     this.emit("stopped", id, job);
     this.#cronJob = undefined;
     return [id, job];
@@ -129,6 +138,36 @@ class Scheduler extends EventEmitter {
   at(cronTime) {
     this.#cronTime = cronTime;
     return this.#proxy;
+  }
+
+  to(schedulename) {
+    this.#name = schedulename;
+    return this.#proxy;
+  }
+
+  getName() {
+    return this.#name;
+  }
+
+  #getId() {
+    const self = this;
+    const callback = this.#callback;
+    const id =
+      this.#id instanceof Function
+        ? this.#id(callback?.name, self.#thisArg?.constructor.name)
+        : this.#id ||
+          (self.#thisArg ? self.#thisArg.constructor.name + "." : "") +
+            (callback?.name || "[Anonymous]");
+    return id;
+  }
+
+  stat() {
+    return {
+      id: this.#getId(),
+      cron: this.#cronTime,
+      timeZone: this.#timeZone,
+      schedule: this.#name,
+    };
   }
 }
 

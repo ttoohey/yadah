@@ -1,5 +1,21 @@
-import ScheduleMixin from "./ScheduleMixin.js";
+import minimatch from "minimatch";
 import Scheduler from "./Scheduler.js";
+import ScheduleMixin from "./ScheduleMixin.js";
+
+const thenable = (it) => ({
+  async then(resolve, reject) {
+    try {
+      const result = [];
+      for await (const data of it()) {
+        result.push(data);
+      }
+      resolve(result);
+    } catch (err) {
+      reject(err);
+    }
+  },
+  [Symbol.asyncIterator]: it,
+});
 
 export default class Schedule {
   schedulers = new Set();
@@ -51,12 +67,27 @@ export default class Schedule {
     }
   }
 
-  async start() {
+  async start(...args) {
     if (this.running) {
       await this.stop();
     }
+    const hasArgs = args.length > 0;
+    const patterns = hasArgs ? [args].flat() : undefined;
+    const shouldStart = hasArgs
+      ? (value) =>
+          patterns.some(
+            (pattern) =>
+              (typeof value === "string" &&
+                typeof pattern === "string" &&
+                minimatch(value, pattern)) ||
+              value === pattern
+          )
+      : (value) => value === undefined;
     for (const scheduler of this.schedulers) {
-      const [id, job] = await scheduler;
+      if (!shouldStart(scheduler.getName())) {
+        continue;
+      }
+      const [id, job] = scheduler.boot();
       const skipped = await this.createJob(id, job);
       scheduler.start(skipped);
     }
@@ -83,46 +114,100 @@ export default class Schedule {
   }
 
   async createJob(name, job) {
-    const knex = this.knex;
-    const schema = this.schema;
-    const key = { name };
-    const data = {
-      started: new Date(),
-      next: job.nextDate()?.toJSDate(),
-      exit_code: null,
-      status: "idle",
-      message: null,
-    };
-    const res = await knex(`${schema}.jobs`).where(key);
-    if (res.length > 0) {
-      await knex(`${schema}.jobs`).where(key).update(data);
-      return res[0].next && res[0].next.valueOf() < Date.now();
-    } else {
-      await knex(`${schema}.jobs`).insert({ ...key, ...data });
-      return false;
+    try {
+      const knex = this.knex;
+      const schema = this.schema;
+      const key = { name };
+      const data = {
+        started: new Date(),
+        next: job.nextDate()?.toJSDate(),
+        exit_code: null,
+        status: "idle",
+        message: null,
+      };
+      const res = await knex(`${schema}.jobs`).where(key);
+      if (res.length > 0) {
+        await knex(`${schema}.jobs`).where(key).update(data);
+        return res[0].next && res[0].next.valueOf() < Date.now();
+      } else {
+        await knex(`${schema}.jobs`).insert({ ...key, ...data });
+        return false;
+      }
+    } catch (cause) {
+      throw new Error("Schedule.createJob() failed", { cause });
     }
   }
 
   async updateJob(name, job, status, exit) {
+    try {
+      const knex = this.knex;
+      if (!knex.client.pool || knex.client.pool.destroyed) {
+        return;
+      }
+      const schema = this.schema;
+      const key = { name };
+      const data = {
+        [status]: new Date(),
+        next: status === "stopped" ? null : job.nextDate()?.toJSDate(),
+        exit_code: typeof exit?.code === "number" ? exit.code : null,
+        status: status,
+        message: exit?.message || null,
+      };
+      await knex(`${schema}.jobs`).where(key).update(data);
+    } catch (cause) {
+      throw new Error("Schedule.updateJob() failed", { cause });
+    }
+  }
+
+  list() {
     const knex = this.knex;
     const schema = this.schema;
-    const key = { name };
-    const data = {
-      [status]: job.lastDate(),
-      next: status === "stopped" ? null : job.nextDate()?.toJSDate(),
-      exit_code: typeof exit?.code === "number" ? exit.code : null,
-      status: status,
-      message: exit?.message || null,
+    const stats = Array.from(this.schedulers).map((scheduler) =>
+      scheduler.stat()
+    );
+    const generator = async function* () {
+      try {
+        for await (const job of knex(`${schema}.jobs`).stream()) {
+          const stat = stats.find((stat) => stat.id === job.name);
+          if (!stat) {
+            continue;
+          }
+          const data = { ...stat, ...job };
+          delete data.id;
+          yield data;
+        }
+      } catch (cause) {
+        throw new Error("Schedule.list() failed", { cause });
+      }
     };
-    await knex(`${schema}.jobs`).where(key).update(data);
+    return thenable(generator);
+  }
+
+  async find(name) {
+    try {
+      const knex = this.knex;
+      const schema = this.schema;
+      const schedulers = this.schedulers;
+      for (const scheduler of schedulers) {
+        const { id, ...stat } = scheduler.stat();
+        if (id !== name) {
+          continue;
+        }
+        const res = await knex(`${schema}.jobs`).where({ name });
+        return { ...stat, ...res[0] };
+      }
+    } catch (cause) {
+      throw new Error("Schedule.find() failed", { cause });
+    }
   }
 
   async migrate() {
     const knex = this.knex;
     const schema = this.schema;
-    await knex.raw(`CREATE SCHEMA IF NOT EXISTS "${schema}"`);
-    await knex.raw(`
-      CREATE TABLE IF NOT EXISTS "${schema}".jobs (
+    await knex.raw(`CREATE SCHEMA IF NOT EXISTS ??`, [schema]);
+    await knex.raw(
+      `
+      CREATE TABLE IF NOT EXISTS ?? (
         name text,
         started timestamptz,
         stopped timestamptz,
@@ -133,6 +218,8 @@ export default class Schedule {
         exit_code int,
         status text,
         message text
-      )`);
+      )`,
+      [`${schema}.jobs`]
+    );
   }
 }
