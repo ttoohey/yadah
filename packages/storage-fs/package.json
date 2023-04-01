@@ -1,12 +1,12 @@
 {
-  "name": "@yadah/subsystem-storage",
+  "name": "@yadah/storage-fs",
   "version": "0.1.0",
-  "description": "Yadah subsystem to manage file storage",
+  "description": "Yadah storage adaptor using local filesystem",
   "keywords": [
     "yadah",
-    "storage"
+    "cron"
   ],
-  "homepage": "https://github.com/ttoohey/yadah/tree/master/packages/subsystem-storage#readme",
+  "homepage": "https://github.com/ttoohey/yadah/tree/master/packages/storage-fs#readme",
   "bugs": "https://github.com/ttoohey/yadah/issues",
   "license": "ISC",
   "author": "ttoohey",

@@ -59,7 +59,8 @@
     "packages/subsystem-pubsub",
     "packages/subsystem-schedule",
     "packages/subsystem-storage",
-    "packages/yadah"
+    "packages/yadah",
+    "packages/storage-fs"
   ],
   "devDependencies": {
     "concurrently": "^7.2.1",
