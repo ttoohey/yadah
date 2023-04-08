@@ -19,3 +19,4 @@ export createMessageQueue, {
 } from "@yadah/subsystem-message-queue";
 export createPubSub, { PubSubMixin } from "@yadah/subsystem-pubsub";
 export createSchedule, { ScheduleMixin } from "@yadah/subsystem-schedule";
+export createStorage, { StorageMixin } from "@yadah/subsystem-storage";

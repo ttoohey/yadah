@@ -1,6 +1,6 @@
 {
   "name": "@yadah/domain-critical-section",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Yadah domain class mixin to avoid stopping async tasks before completion",
   "keywords": [
     "yadah"
@@ -36,7 +36,7 @@
     "@babel/eslint-parser": "^7.19.1",
     "@babel/plugin-proposal-export-default-from": "^7.18.10",
     "@babel/preset-env": "^7.20.2",
-    "@yadah/depcheck": "0.1.1",
+    "@yadah/depcheck": "0.2.0",
     "ava": "^5.1.1",
     "babel-register-esm": "^1.2.4",
     "eslint": "^8.32.0",
@@ -46,8 +46,8 @@
     "rimraf": "^4.1.2"
   },
   "dependencies": {
-    "@yadah/mixin": "0.1.0",
-    "@yadah/subsystem-logger": "0.1.1"
+    "@yadah/mixin": "0.2.0",
+    "@yadah/subsystem-logger": "0.2.0"
   },
   "engines": {
     "node": ">=18.3.0"

@@ -1,6 +1,6 @@
 {
   "name": "@yadah/service-model",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "deprecated; see @yadah/domain-model",
   "homepage": "https://github.com/ttoohey/yadah/tree/master/packages/service-model#readme",
   "bugs": "https://github.com/ttoohey/yadah/issues",

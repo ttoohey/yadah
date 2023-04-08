@@ -225,3 +225,15 @@ A function to create a schedule subsystem.
 ### `ScheduleMixin`
 
 A mixin for Yadah domain classes which allows registering scheduled jobs.
+
+## subsystem-storage
+
+https://www.npmjs.com/package/@yadah/subsystem-storage
+
+### `createStorage`
+
+A function to create a Storage subsystem.
+
+### `StorageMixin`
+
+A mixin for Yadah domain classes which provides access to the storage subsystem.

@@ -1,6 +1,6 @@
 {
   "name": "@yadah/service-critical-section",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "deprecated; see @yadah/domain-critical-section",
   "keywords": [
     "yadah"

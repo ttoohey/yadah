@@ -1,6 +1,6 @@
 {
   "name": "@yadah/service-listener",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "deprecated; see @yadah/domain-listener",
   "homepage": "https://github.com/ttoohey/yadah/tree/master/packages/service-listener#readme",
   "bugs": "https://github.com/ttoohey/yadah/issues",
