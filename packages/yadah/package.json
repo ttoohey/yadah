@@ -1,6 +1,6 @@
 {
   "name": "@yadah/yadah",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Business logic layer fitting between your API and your database",
   "keywords": [
     "yadah"
@@ -54,7 +54,7 @@
     "@yadah/subsystem-knex": "0.2.0",
     "@yadah/subsystem-logger": "0.2.0",
     "@yadah/subsystem-message-queue": "0.2.0",
-    "@yadah/subsystem-pubsub": "0.2.0",
+    "@yadah/subsystem-pubsub": "0.2.1",
     "@yadah/subsystem-schedule": "0.2.0",
     "@yadah/subsystem-storage": "0.2.0"
   },

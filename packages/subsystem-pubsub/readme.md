@@ -90,6 +90,48 @@ Subscribes to the specified channel.
 Returns a `Readable` object stream to asynchronously read messages from the
 channel.
 
+A subscription stream may be converted to an `AsyncIterator` using the
+`iterator()` method. Calling `.return()` on the iterator will end the stream
+(this is equivalent to calling `unsubscribe()` on the stream).
+
+The iterator also has two methods:
+
+- `push(...payload)` - pushes a payload onto the stream
+- `map(callback)` - allows to filter and transform the payload
+
+Both methods return an iterator with the same properties.
+
+The `callback` function has signature `(...payload) => payload`. If the callback
+returns a non-array value the payload is ignored.
+
+#### Example
+
+```js
+import { createKnex } from "@yadah/subsystem-knex";
+import { createPubSub } from "@yadah/subsystem-pubsub";
+
+const knex = createKnex({
+  client: "postgresql",
+  connection: process.env.DATABASE_URL,
+});
+const pubsub = createPubSub({ knex });
+
+function subscribe(criteria) {
+  return pubsub
+    .subscribe("MyDomain")
+    .iterator()
+    .map((value) => {
+      // filter out events that don't match the criteria
+      if (!isMatch(value, criteria)) {
+        return null;
+      }
+      // return a new payload
+      return [value];
+    })
+    .push(intialValue);
+}
+```
+
 ### PubSub.unsubscribe(stream)
 
 Ends the subscription stream.

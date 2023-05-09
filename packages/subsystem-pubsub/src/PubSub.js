@@ -2,6 +2,7 @@ import assert from "node:assert";
 import { Hash } from "node:crypto";
 import { once } from "node:events";
 import { Readable } from "node:stream";
+import { Mutex } from "async-mutex";
 
 const toClassid = (val) => {
   if (typeof val === "number") {
@@ -13,6 +14,7 @@ const toClassid = (val) => {
 };
 
 export default class PubSub {
+  #mutex;
   constructor(knex, { lockId, schema = "pubsub", channelPrefix = "pubsub" }) {
     assert.equal(
       knex.client.config.client,
@@ -23,44 +25,49 @@ export default class PubSub {
     this.classid = toClassid(lockId || this.constructor.name);
     this.schema = schema;
     this.channelPrefix = channelPrefix;
+    this.#mutex = new Mutex();
   }
 
   async listen() {
-    const knex = this.knex;
-    const classid = this.classid;
-    const schema = this.schema;
-    const prefix = this.channelPrefix;
-    if (this.connection) {
-      return [this.connection, this.id];
-    }
-    const connection = await knex.client.acquireRawConnection();
-    const result = await connection.query(
-      `INSERT INTO "${schema}".listeners (channels) VALUES (ARRAY[]::text[]) RETURNING id`
-    );
-    const { id } = result.rows[0];
-    await connection.query(`SELECT pg_advisory_lock($1, $2)`, [classid, id]);
-    await connection.query(`LISTEN "${prefix}${id}"`);
-    this.connection = connection;
-    this.id = id;
-    return [connection, id];
+    return await this.#mutex.runExclusive(async () => {
+      const knex = this.knex;
+      const classid = this.classid;
+      const schema = this.schema;
+      const prefix = this.channelPrefix;
+      if (this.connection) {
+        return [this.connection, this.id];
+      }
+      const connection = await knex.client.acquireRawConnection();
+      const result = await connection.query(
+        `INSERT INTO "${schema}".listeners (channels) VALUES (ARRAY[]::text[]) RETURNING id`
+      );
+      const { id } = result.rows[0];
+      await connection.query(`SELECT pg_advisory_lock($1, $2)`, [classid, id]);
+      await connection.query(`LISTEN "${prefix}${id}"`);
+      this.connection = connection;
+      this.id = id;
+      return [connection, id];
+    });
   }
 
   async unlisten() {
-    if (!this.connection) {
-      return;
-    }
-    const knex = this.knex;
-    const classid = this.classid;
-    const connection = this.connection;
-    const schema = this.schema;
-    delete this.connection;
-    delete this.id;
-    await connection.end();
-    await knex.client.releaseConnection(connection);
-    await knex.raw(
-      `DELETE FROM "${schema}".listeners WHERE pg_try_advisory_xact_lock(?,id)`,
-      [classid]
-    );
+    return await this.#mutex.runExclusive(async () => {
+      if (!this.connection) {
+        return;
+      }
+      const knex = this.knex;
+      const classid = this.classid;
+      const connection = this.connection;
+      const schema = this.schema;
+      delete this.connection;
+      delete this.id;
+      await connection.end();
+      await knex.client.releaseConnection(connection);
+      await knex.raw(
+        `DELETE FROM "${schema}".listeners WHERE pg_try_advisory_xact_lock(?,id)`,
+        [classid]
+      );
+    });
   }
 
   #subscriptions = new Map();
@@ -68,15 +75,17 @@ export default class PubSub {
     const [connection, id] = await this.listen();
     const map = this.#subscriptions;
     const schema = this.schema;
-    if (!map.has(channel)) {
-      map.set(channel, []);
-      await connection.query(
-        `UPDATE "${schema}".listeners SET channels=$1 WHERE id=$2`,
-        [Array.from(map.keys()), id]
-      );
-    }
-    map.set(channel, map.get(channel).concat(stream));
-    stream.emit("pubsub:ready");
+    return await this.#mutex.runExclusive(async () => {
+      if (!map.has(channel)) {
+        map.set(channel, []);
+        await connection.query(
+          `UPDATE "${schema}".listeners SET channels=$1 WHERE id=$2`,
+          [Array.from(map.keys()), id]
+        );
+      }
+      map.set(channel, map.get(channel).concat(stream));
+      stream.emit("pubsub:ready");
+    });
   }
   async #removeSubscription(stream, channel) {
     try {
@@ -98,9 +107,11 @@ export default class PubSub {
       if (map.size === 0) {
         await this.unlisten();
       } else {
-        await connection.query(
-          `UPDATE "${schema}".listeners SET channels=$1 WHERE id=$2`,
-          [Array.from(map.keys()), id]
+        await this.#mutex.runExclusive(() =>
+          connection.query(
+            `UPDATE "${schema}".listeners SET channels=$1 WHERE id=$2`,
+            [Array.from(map.keys()), id]
+          )
         );
       }
     } finally {
@@ -108,7 +119,12 @@ export default class PubSub {
     }
   }
 
-  subscribe(channel, options) {
+  /**
+   * @param {string} channel
+   * @param {ReadableOptions} options
+   * @return {Readable}
+   */
+  subscribe(channel, options = undefined) {
     const self = this;
     let reading = false;
     const stream = new Readable({
@@ -136,9 +152,52 @@ export default class PubSub {
     });
     stream.on("close", () => this.#removeSubscription(stream, channel));
     stream.on("error", () => this.#removeSubscription(stream, channel));
+    const iteratorFn = stream.iterator;
+    stream.iterator = () => {
+      const iterator = iteratorFn.call(stream);
+      const addBindings = (thisArg, bindings) => {
+        for (const [key, fn] of Object.entries(bindings)) {
+          thisArg[key] = fn.bind(thisArg);
+        }
+        return thisArg;
+      };
+      const bindings = {
+        async return(value) {
+          await self.unsubscribe(stream);
+          return { done: true, value };
+        },
+        push(...payload) {
+          stream.push(payload);
+          return this;
+        },
+        map(mapper) {
+          const iterator = this;
+          const mappedIterator = (async function* () {
+            for await (const payload of iterator) {
+              try {
+                const mappedPayload = await mapper(...payload);
+                if (!Array.isArray(mappedPayload)) {
+                  continue;
+                }
+                yield mappedPayload;
+              } catch (err) {
+                stream.destroy(err);
+              }
+            }
+          })();
+          return addBindings(mappedIterator, bindings);
+        },
+      };
+      return addBindings(iterator, bindings);
+    };
     return stream;
   }
 
+  /**
+   *
+   * @param {Readable} stream
+   * @returns {Promise<void>}
+   */
   unsubscribe(stream) {
     stream.push(null);
     return once(stream, "pubsub:end");

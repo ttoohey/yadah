@@ -1,6 +1,6 @@
 {
   "name": "@yadah/subsystem-pubsub",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Yadah subsystem to provide Pub/Sub functionality to service classes",
   "keywords": [
     "yadah"
@@ -49,6 +49,7 @@
     "@yadah/domain-listener": "0.2.0",
     "@yadah/mixin": "0.2.0",
     "@yadah/subsystem-context": "0.2.0",
+    "async-mutex": "^0.4.0",
     "camelcase": "^7.0.0"
   },
   "engines": {
