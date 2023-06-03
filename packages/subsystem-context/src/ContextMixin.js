@@ -17,6 +17,16 @@ function ContextMixin(superclass) {
     get context() {
       return this.#context;
     }
+
+    onAsync(eventName, listener) {
+      return this.on(eventName, (...args) =>
+        this.context(() => listener(...args))
+      );
+    }
+
+    emitAsync(eventName, ...args) {
+      return this.#context(() => this.emit(eventName, ...args));
+    }
   };
 }
 
