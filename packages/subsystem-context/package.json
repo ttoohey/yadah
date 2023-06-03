@@ -1,6 +1,6 @@
 {
   "name": "@yadah/subsystem-context",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "Yadah domain class mixin to provide a shared context to promise chains",
   "keywords": [
     "yadah"

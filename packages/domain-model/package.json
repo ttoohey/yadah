@@ -1,6 +1,6 @@
 {
   "name": "@yadah/domain-model",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "Yadah domain class mixin to wrap Objection.js models",
   "keywords": [
     "yadah",
@@ -52,8 +52,8 @@
     "@yadah/objection-copy": "0.2.0",
     "@yadah/objection-iterator": "0.2.0",
     "@yadah/objection-scope": "0.2.0",
-    "@yadah/subsystem-context": "0.2.0",
-    "@yadah/subsystem-knex": "0.2.0",
+    "@yadah/subsystem-context": "0.2.2",
+    "@yadah/subsystem-knex": "0.2.2",
     "csv-stringify": "^6.1.0",
     "lodash-es": "^4.17.21",
     "objection": "^3.0.1"

@@ -1,6 +1,6 @@
 {
   "name": "@yadah/subsystem-knex",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "Yadah subsystem to provide access to a shared Knex instance",
   "keywords": [
     "yadah",
@@ -48,7 +48,7 @@
   },
   "dependencies": {
     "@yadah/mixin": "0.2.0",
-    "@yadah/subsystem-context": "0.2.0",
+    "@yadah/subsystem-context": "0.2.2",
     "knex": "^2.1.0",
     "pg": "^8.7.3"
   },

@@ -373,6 +373,6 @@ this.mq
   .do(this.handleExample);
 ```
 
-The callback is executed in the context of the event emitter.
+The callback is executed in the context of the job runner.
 
 The callback may return a promise.

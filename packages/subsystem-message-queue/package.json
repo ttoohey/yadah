@@ -1,6 +1,6 @@
 {
   "name": "@yadah/subsystem-message-queue",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "Yadah subsystem to provide a shared message queue",
   "keywords": [
     "yadah"
@@ -48,8 +48,8 @@
     "@yadah/data-manager": "0.2.0",
     "@yadah/domain-listener": "0.2.0",
     "@yadah/mixin": "0.2.0",
-    "@yadah/subsystem-context": "0.2.0",
-    "@yadah/subsystem-knex": "0.2.0",
+    "@yadah/subsystem-context": "0.2.2",
+    "@yadah/subsystem-knex": "0.2.2",
     "graphile-worker": "^0.13.0",
     "pg": "^8.7.3",
     "rimraf": "^4.1.2"

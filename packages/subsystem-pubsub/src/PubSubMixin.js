@@ -1,12 +1,13 @@
 import { dedupe, pipe } from "@yadah/mixin";
 import ListenerMixin from "@yadah/domain-listener";
 import { ContextMixin } from "@yadah/subsystem-context";
+import { KnexMixin } from "@yadah/subsystem-knex";
 import camelcase from "camelcase";
 import assert from "node:assert";
 import PubSubAgent from "./PubSub.js";
 
 function PubSubMixin(superclass) {
-  const mixins = pipe(superclass, ContextMixin, ListenerMixin);
+  const mixins = pipe(superclass, ContextMixin, ListenerMixin, KnexMixin);
   return class PubSub extends mixins {
     /**
      * PubSub subsystem instance
