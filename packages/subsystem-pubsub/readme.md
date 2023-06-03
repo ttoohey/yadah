@@ -218,3 +218,10 @@ The final value is a function suitable to be used in an event handler.
 this.on("eventName", this.publish.id("EVENT"));
 this.publish.on("eventName").id("EVENT");
 ```
+
+### .subscribe([channel])
+
+A short-hand for subscribing to a domain's channel. If no channel is specified,
+the domain's constructor name will be used.
+
+Returns the subscription `AsyncIterator`.

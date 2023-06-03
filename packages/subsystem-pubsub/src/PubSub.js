@@ -1,4 +1,5 @@
 import assert from "node:assert";
+import v8 from "node:v8";
 import { Hash } from "node:crypto";
 import { once } from "node:events";
 import { Readable } from "node:stream";
@@ -133,12 +134,14 @@ export default class PubSub {
       async construct(cb) {
         const [connection] = await self.listen();
         connection.on("notification", (msg) => {
-          const { channel: msgChannel, payload } = JSON.parse(msg.payload);
+          const { channel: msgChannel, data } = v8.deserialize(
+            Buffer.from(msg.payload, "base64")
+          );
           if (msgChannel !== channel) {
             return;
           }
           if (this.readable && reading) {
-            reading = this.push(payload.data);
+            reading = this.push(data);
           }
         });
         connection.on("close", () => this.readable && this.push(null));
@@ -209,17 +212,18 @@ export default class PubSub {
     const schema = this.schema;
     const prefix = this.channelPrefix;
     const knex = transactionOrKnex || this.knex;
+    const payload = v8.serialize({ channel, data }).toString("base64");
     await knex.raw(
       `
         SELECT pg_notify(
             :prefix::text || id::text,
-            jsonb_build_object('channel', :channel::text, 'payload', :payload::jsonb)::text
+            :payload::text
         ) FROM "${schema}".listeners
         WHERE
             NOT pg_try_advisory_xact_lock(:classid, id)
             AND :channel = ANY(channels)
       `,
-      { prefix, channel, payload: { data }, classid }
+      { prefix, channel, payload, classid }
     );
   }
 

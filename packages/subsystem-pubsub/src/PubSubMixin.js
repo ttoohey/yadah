@@ -72,6 +72,10 @@ function PubSubMixin(superclass) {
       };
       return handler;
     }
+
+    subscribe(channel) {
+      return this.pubsub.subscribe(channel || this.constructor.name).iterator();
+    }
   };
 }
 
