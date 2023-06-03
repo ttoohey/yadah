@@ -27,11 +27,9 @@ function MessageQueueMixin(superclass) {
     }
 
     get mq() {
-      return this.#mq;
-    }
-
-    get queue() {
-      return new Queue(this);
+      const domain = this;
+      const mq = this.#mq;
+      return new Queue(domain, mq);
     }
   };
 }

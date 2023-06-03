@@ -8,14 +8,10 @@ mixin that provides a message/job queue using
 
 ```js
 // MyDomain.js
-import createMessageQueue, {
-  MessageQueueMixin,
-} from "@yadah/subsystem-message-queue";
+import { MessageQueueMixin } from "@yadah/subsystem-message-queue";
 import DataManager, { Domain } from "@yadah/data-manager";
 import ListenerMixin from "@yadah/domain-listener";
-import createContext from "@yadah/subsystem-context";
-import createKnex from "@yadah/subsystem-knex";
-import createLogger, { LoggerMixin } from "@yadah/subsystem-logger";
+import { LoggerMixin } from "@yadah/subsystem-logger";
 import { pipe } from "@yadah/mixin";
 
 const mixins = pipe(Domain, ListenerMixin, LoggerMixin, MessageQueueMixin);
@@ -26,10 +22,10 @@ class MyDomain extends mixins {
     super.registerListeners();
 
     // This will listen for the "example" event being emitted on the MyDomain
-    // singleton, and create a message queue task named "MyDomain.handleExample".
-    // The background service will handle the task by calling the `handleExample`
+    // singleton, and create a message queue job named "MyDomain.handleExample".
+    // A background service handles the job by calling the `handleExample`
     // method
-    this.queue.on("example").do(this.handleExample);
+    this.mq.on("example").do(this.handleExample);
   }
 
   handleExample(...payload) {
@@ -41,6 +37,12 @@ export default MyDomain;
 ```
 
 ```js
+// background.js
+
+import createMessageQueue from "@yadah/subsystem-message-queue";
+import createContext from "@yadah/subsystem-context";
+import createKnex from "@yadah/subsystem-knex";
+import createLogger from "@yadah/subsystem-logger";
 import MyDomain from "./MyDomain.js";
 
 // create subsystems
@@ -73,28 +75,114 @@ await dataManager.shutdown();
 await knex.destroy();
 ```
 
-## createMessageQueue(knex, logger)
+## `createMessageQueue(knex, logger)`
 
-Creates a message-queue (`mq`) subsystem.
+- `knex` - a Knex instance
+- `logger` - a logger instance
 
-## MessageQueueMixin
+Creates a message queue (`mq`) subsystem.
 
-The `MessageQueueMixin` function will add a `.mq` property to domain classes which
-provides access to the message-queue instance, and a `.queue` getter to use
-in the `registerListeners()` function.
+Returns a `MessageQueue` instance.
+
+## `class MessageQueue`
+
+### `MessageQueue.start()`
+
+- Returns `<Promise<void>>`
+
+Starts listening for messages and processing them.
+
+### `MessageQueue.stop()`
+
+- Returns `<Promise<void>>`
+
+Stops listening for messages and resolves when all the in progress jobs are
+complete.
+
+### `MessageQueue.send(taskId, options)`
+
+- `taskId` `<string>`
+- `options` `<object>`
+  - `key` `<string>`
+  - `payload` `<any[]>`
+  - `runAt` `<Date>` | `<string>` | `<number>` | `<Knex.Raw>`
+  - `queueName` `<string>`
+
+Adds or updates a job.
+
+### `MessageQueue.remove(key)`
+
+- `key` `<string>`
+- Returns `<Promise<Job>>` | `<undefined>`
+
+Removes the job with the specified `key`.
+
+### `MessageQueue.complete(id)` <br /> `MessageQueue.complete(ids)`
+
+- `id` `<number>` the id of the job
+- `ids` `<number>[]` a list of job ids
+- Returns `<Promise<Job>>`|`<Promise<Job[]>>` | `<Promise<undefined>>`
+
+Manually completes a job or a list of jobs so that it/they will no longer run.
+
+Returns a single `Job` if a single `id` is provided, or a list of `Jobs` that
+were updated if an array was provided. If no job was found then `undefined` is
+returned.
+
+### `MessageQueue.permanantlyFail(id, reason)` <br /> `MessageQueue.permanantlyFail(ids, reason)`
+
+- `id` `<number>` the id of the job
+- `ids` `<number>[]` a list of job ids
+- `reason` `<string>`
+- Returns `<Job>`|`<Job[]>`
+
+Manually mark a job or a list of jobs as permanantly failed.
+
+Returns a single `Job` if a single `id` is provided, or a list of `Jobs` that
+were updated if an array was provided. If no job was found then `undefined` is
+returned.
+
+### `MessageQueue.reschedule(id, runAt)` <br /> `MessageQueue.reschedule(ids, runAt)`
+
+- `id` `<number>` the id of the job
+- `ids` `<number>[]` a list of job ids
+- `runAt` `<Date>` | `<string>` | `<number>` | `<Knex.Raw>` defaults to 'now'
+- Returns `<Promise<Job>>`|`<Promise<Job[]>>` | `<Promise<undefined>>`
+
+Reschedule a job or list of jobs to the specified timestamp.
+
+Returns a single `Job` if a single `id` is provided, or a list of `Jobs` that
+were updated if an array was provided. If no job was found then `undefined` is
+returned.
+
+### `MessageQueue.jobs()`
+
+- Returns: `<Knex.QueryBuilder<Job>>`
+
+Reads the list of pending jobs.
+
+### `MessageQueue.job(id)`
+
+- `id` `<number>`
+- Returns: `<Knex.QueryBuilder<Job>>`
+
+Find a specific job by id.
+
+## `MessageQueueMixin`
+
+The `MessageQueueMixin` function adds a `.mq` property to domain classes which
+allows using the message queue subsystem.
 
 An error will be thrown if no `mq` subsystem is provided during the `boot`
 lifecycle.
 
-The `.queue` getter is used to setup an event handler to create and handle
-message queue tasks.
-
 ```js
+const mixins = pipe(Domain, MessageQueueMixin);
 class MyDomain extends mixins {
   registerListeners() {
     super.registerListeners();
 
-    this.queue.on("example").do(this.handleExample);
+    this.mq.on("example").do(this.handleExample);
   }
 
   handleExample() {
@@ -103,10 +191,16 @@ class MyDomain extends mixins {
 }
 ```
 
-The `.queue` getter returns an object that allows defining how to handle an
-event in a fluent manner. The modifiers are:
+The `.mq` getter returns a `Queue` instance. This can be used to define how
+to listen for events to be sent to the message queue, and to retrieve the active
+job within event handlers.
 
-### .queue.do(callback) or .queue.do()
+## `Queue`
+
+### `Queue.do([handler])`
+
+- `handler` `<Function>`
+- Returns: `<Function>`
 
 _Note: the `.do()` method is not a modifier like other methods. It must be the final method in a fluent chain_
 
@@ -119,47 +213,63 @@ and the return value can be ignored.
 The following are equivalent:
 
 ```js
-this.on("example", this.queue.do(this.handleExample));
-this.queue.on("example").do(this.handleExample);
+this.on("example", this.mq.do(this.handleExample));
+this.mq.on("example").do(this.handleExample);
 ```
 
 If no callback is provided `.do()` will remove any job in the queue
 with a key matching a key set using the `.key()` modifier.
 
 ```js
-this.queue
+this.mq
   .on("delete")
   .key((data) => `data:${data.id}`)
   .do(); // remove job
 ```
 
-### .queue.on([Domain,] eventName, ...)
+### `Queue.on([domain][, ...eventNames])`
 
-The `.on` modifier is used to list event names that tasks will be created for.
+- `domain` `<Domain>` (optional) the domain to add an event listener to
+- `eventNames` `<string[]>` one or more event names to listen for
+- Returns: `this` to allow chaining modifiers in a fluent way
+
+The `.on` modifier is used to listen for events on the domain that tasks will be
+created for.
 
 To attach events to a different Domain class, pass it as the first argument.
 
-### .queue.map((...args) => [...args])
+### `Queue.map(mapper)`
+
+- `mapper` `<Function>`|`<AsyncFunction>`
+  - `...args` `<any[]>` the event arguments that were emitted
+  - Returns: `<any[]>` | `<falsey>`
+- Returns: `this` to allow chaining modifiers in a fluent way
 
 The `.map` modifier is used to transform and filter the message payload. The
 payload will be the event arguments by default, but may be altered by supplying
-a callback function to `.map`. The callback should return an array containing
+a `mapper` function to `.map`. The `mapper` should return an array containing
 data to send as the message payload, or a non-array (typically `null` or
 `undefined`) to filter the event and not send a message.
 
-The callback may return a promise.
+The `mapper` may return a promise.
 
 ```js
 // # Example
 // only send messages when the `public` argument is true
 // also, only send the message in the payload
-this.queue
+this.mq
   .on(eventName)
   .map((message, public) => (public ? [message] : null))
   .do(this.handleExample);
 ```
 
-### .queue.id(string) or .queue.id((id) => string)
+### `Queue.id(taskIdentifier)` <br /> `Queue.id(callback)`
+
+- `taskIdentifier` `<string>`
+- `callback` `<Function>`
+  - `id` `<string>` the default task identifier
+  - Returns: `<string>` the new task identifier
+- Returns: `this` to allow chaining modifiers in a fluent way
 
 The `.id` modifier is used to override the default "task id". This allows
 controlling the task id in cases where that is required. The default task id
@@ -170,14 +280,20 @@ a new value. This can be useful when using the same code for multiple events, li
 
 ```js
 ["ev1", "ev2", "ev3"].forEach((eventName) => {
-  this.queue
+  this.mq
     .on(eventName)
     .id((id) => `${id}:${eventname}`)
     .do(this.handleEv);
 });
 ```
 
-### .queue.to(string) or .queue.to((...args) => string)
+### `Queue.to(queueName)` <br /> `Queue.to(callback)`
+
+- `queueName` `<string>`
+- `callback` `<Function>`|`<AsyncFunction>`
+  - `...args` `<any[]>` the event arguments
+  - Returns: `<string>` the queue name
+- Returns: `this` to allow chaining modifiers in a fluent way
 
 Sets the queue jobs will be sent to. Jobs sent to a named queue will be
 executed in serial.
@@ -187,7 +303,13 @@ return the name of the queue for the event to be sent to.
 
 The callback may return a promise.
 
-### .queue.at(date) or .queue.at((...args) => date)
+### `Queue.at(timestamp)` <br> `Queue.at(callback)`
+
+- `timestamp` `<string>`|`<number>`|`<Date>`|`<Knex.Raw>`
+- `callback` `<Function>`|`<AsyncFunction>`
+  - `...args` `<any[]>` the event arguments that were emitted
+  - Returns: `<string>`|`<number>`|`<Date>`|`<Knex.Raw>` the timestamp
+- Returns: `this` to allow chaining modifiers in a fluent way
 
 Sets the time at which the job will be run.
 
@@ -201,12 +323,17 @@ return a value representing the time the job will be run.
 The callback may return a promise.
 
 ```js
-this.queue.at(() => new Date() + 3600 * 1000).do(this.handleExample);
-this.queue.at(knex.raw(`now() + '1 hour'`)).do(this.handleExample);
-this.queue.at((data) => data.timestampField).do(this.handleExample);
+this.mq.at(() => new Date() + 3600 * 1000).do(this.handleExample);
+this.mq.at(knex.raw(`now() + '1 hour'`)).do(this.handleExample);
+this.mq.at((data) => data.timestampField).do(this.handleExample);
 ```
 
-### .queue.key(string) or .queue.key((...args) => string)
+### `Queue.key(jobKey)` <br /> `Queue.key((...args) => string)`
+
+- `jobKey` `<string>`
+- `callback` `<Function>`|`<AsyncFunction>`
+  - `...args` `<any[]>` the event arguments that were emitted
+  - Returns: `<string>` the job key
 
 Sets the job key which allows replacing or deleting a job that is in the
 queue.
@@ -217,7 +344,7 @@ return the key.
 The callback may return a promise.
 
 ```js
-this.queue
+this.mq
   .key((data) => `my-custom-key:${data.type}:${data.id}`)
   .do(this.handleExample);
 ```
@@ -225,34 +352,27 @@ this.queue
 Using a key is useful when combined with `.at()` to create a deferred job which
 may be updated.
 
-### .queue.onJob(callback)
+### `Queue.onJobStart(handler)` <br /> `Queue.onJobSuccess(handler)` <br /> `Queue.onJobError(handler)` <br /> `Queue.onJobFailed(handler)` <br /> `Queue.onJobComplete(handler)`
 
-Register a callback to run when a job is created. This provides access to the
-data related to the job.
+- `handler` `<Function>`|`<AsyncFunction>`
+  - `...args` `<any[]>` the event arguments that were emitted
+
+Execute a callback function when a job event occurs. The `handler` receives
+the job payload as arguments.
+
+The active job may be retrieved by acessing `mq.job`.
+
+For 'job:error', 'job:failed', and 'job:complete' events, the error can be
+retrieved by accessing `mq.error`.
 
 ```js
-this.queue
+this.mq
   .on(eventName)
-  .onJob((job) => console.log(`Job #${job.id} created`))
+  .onJobStart(() => this.logger.info(`Job #${this.mq.job.id} started`))
+  .onJobComplete(() => this.logger.info(`Job #${this.mq.job.id} completed`))
   .do(this.handleExample);
 ```
 
 The callback is executed in the context of the event emitter.
-
-The callback may return a promise.
-
-### .queue.onRun(callback)
-
-Register a callback to run when a job is about to run. The provides access to
-the data related to the job.
-
-```js
-this.queue
-  .on(eventName)
-  .onRun((job) => console.log(`Job #${job.id} starting`))
-  .do(this.handleExample);
-```
-
-The callback is executed in the context of the job handler.
 
 The callback may return a promise.

@@ -1,16 +1,24 @@
 import { Domain } from "@yadah/data-manager";
 import { pipe } from "@yadah/mixin";
+import { decodeJob, decodeJobPayload, encodeJobPayload } from "./helpers.js";
+
+const MQ = Symbol("MQ");
 
 export default class Queue {
   #domain;
+  #mq;
   #id = null;
   #queueName = null;
   #map = (...args) => args;
   #onList = [];
   #runAt = () => new Date();
   #getKey = () => null;
-  #onJob = null;
-  #onRun = null;
+  #onJobCreate;
+  #onJobStart;
+  #onJobSuccess;
+  #onJobError;
+  #onJobFailed;
+  #onJobComplete;
 
   #resolve(resolver, args) {
     if (resolver instanceof Function) {
@@ -19,8 +27,9 @@ export default class Queue {
     return resolver;
   }
 
-  constructor(domain) {
+  constructor(domain, mq) {
     this.#domain = domain;
+    this.#mq = mq;
   }
 
   on(...args) {
@@ -61,34 +70,50 @@ export default class Queue {
     return this;
   }
 
-  onJob(onJob) {
-    this.#onJob = onJob;
+  onJobStart(onJobStart) {
+    this.#onJobStart = onJobStart;
     return this;
   }
-
-  onRun(onRun) {
-    this.#onRun = onRun;
+  onJobSuccess(onJobSuccess) {
+    this.#onJobSuccess = onJobSuccess;
+    return this;
+  }
+  onJobError(onJobError) {
+    this.#onJobError = onJobError;
+    return this;
+  }
+  onJobFailed(onJobFailed) {
+    this.#onJobFailed = onJobFailed;
+    return this;
+  }
+  onJobComplete(onJobComplete) {
+    this.#onJobComplete = onJobComplete;
     return this;
   }
 
   do(handler) {
     const domain = this.#domain;
+    const mq = this.#mq;
     const id = `${domain.constructor.name}.${handler?.name}`;
     const taskId = this.#resolve(this.#id || id, [id]);
+    const taskList = mq.taskList;
+
     if (handler) {
-      domain.mq.taskList[taskId] = async ({ job }, ...args) => {
-        await this.#resolve(this.#onRun, [job]);
-        const result = handler.apply(domain, args);
-        return result;
+      taskList[taskId] = (payload, helpers) => {
+        const args = decodeJobPayload(payload);
+        this.job = decodeJob(helpers.job);
+        return handler.apply(domain, args);
       };
     }
+
     const eventHandler = (...args) =>
       domain.context(async () => {
         try {
-          const payload = await this.#map(...args);
-          if (!Array.isArray(payload)) {
+          const mappedArgs = await this.#map(...args);
+          if (!Array.isArray(mappedArgs)) {
             return;
           }
+          const payload = encodeJobPayload(mappedArgs);
           const [runAt, key, queueName] = await Promise.all([
             this.#resolve(this.#runAt, args),
             this.#resolve(this.#getKey, args),
@@ -96,22 +121,81 @@ export default class Queue {
           ]);
           const trx = domain.transactionOrKnex;
           if (handler) {
-            const job = await domain.mq.send(
+            const job = await mq.send(
               taskId,
               { key, payload, queueName, runAt },
               trx
             );
-            await this.#resolve(this.#onJob, [job]);
+            this.job = job;
           } else if (key) {
-            await domain.mq.remove(key, trx);
+            await mq.remove(key, trx);
           }
         } catch (cause) {
           throw new Error("Event handler error", { cause });
         }
       });
+
     this.#onList.forEach(([domain, eventName]) =>
       domain.on(eventName, eventHandler)
     );
+
+    const withContext = (handler) =>
+      handler
+        ? (job, error) => {
+            return domain.context(() => {
+              this.job = job;
+              this.error = error;
+              return handler.call(domain, ...job.payload);
+            });
+          }
+        : undefined;
+
+    mq.eventHandlerList[taskId] = {
+      "job:start": withContext(this.#onJobStart),
+      "job:success": withContext(this.#onJobSuccess),
+      "job:error": withContext(this.#onJobError),
+      "job:failed": withContext(this.#onJobFailed),
+      "job:complete": withContext(this.#onJobComplete),
+    };
+
     return eventHandler;
+  }
+
+  /**
+   * gets the current job from the promise chain context
+   */
+  get job() {
+    const domain = this.#domain;
+    return domain.context.get(MQ)?.job;
+  }
+
+  /**
+   * sets the current job in the promise chain context, creating a new context
+   * reference if necessary
+   */
+  set job(job) {
+    const domain = this.#domain;
+    const ref = domain.context.get(MQ) || {};
+    domain.context.set(MQ, ref);
+    ref.job = job;
+  }
+
+  /**
+   * gets the current error from the promise chain context
+   */
+  get error() {
+    const domain = this.#domain;
+    return domain.context.get(MQ)?.error;
+  }
+
+  /**
+   * sets the current error in the promise chain context, creating a new
+   * context reference if necessary
+   */
+  set error(error) {
+    const domain = this.#domain;
+    const ref = domain.context.get(MQ) || {};
+    domain.context.set(MQ, ref);
+    ref.error = error;
   }
 }

@@ -1,5 +1,5 @@
 {
-  "env": { "node": true, "es6": true },
+  "env": { "node": true, "es2020": true },
   "extends": ["eslint:recommended", "prettier"],
   "parser": "@babel/eslint-parser"
 }
